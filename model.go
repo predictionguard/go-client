@@ -11,6 +11,7 @@ func (err *Error) Error() string {
 }
 
 // =============================================================================
+// ChatCompletion
 
 // Message represents the role of the sender and the content to process.
 type Message struct {
