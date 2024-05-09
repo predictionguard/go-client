@@ -2,16 +2,21 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 )
+
+var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
 // This provides a default client configuration and is set with reasonable
 // defaults. Users can replace this client with application specific settings
@@ -48,7 +53,7 @@ type Client struct {
 func New(log Logger, host string, apiKey string, options ...func(cln *Client)) *Client {
 	cln := Client{
 		log:    log,
-		host:   host,
+		host:   strings.TrimLeft(host, "/"),
 		apiKey: apiKey,
 		http:   &defaultClient,
 	}
@@ -70,7 +75,7 @@ func WithClient(http *http.Client) func(cln *Client) {
 
 // =============================================================================
 
-func (cln *Client) rawRequest(ctx context.Context, method string, endpoint string, body io.Reader, v any) error {
+func (cln *Client) rawRequest(ctx context.Context, method string, endpoint string, body any, v any) error {
 	var statusCode int
 
 	u, err := url.Parse(endpoint)
@@ -84,7 +89,14 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 		cln.log(ctx, "go-client: rawRequest: completed", "status", statusCode)
 	}()
 
-	req, err := http.NewRequestWithContext(ctx, method, endpoint, body)
+	var b bytes.Buffer
+	if body != nil {
+		if err := json.NewEncoder(&b).Encode(body); err != nil {
+			return fmt.Errorf("encoding error: %w", err)
+		}
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, &b)
 	if err != nil {
 		return fmt.Errorf("create request error: %w", err)
 	}
@@ -129,14 +141,15 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 
 		return nil
 
-	case http.StatusUnauthorized:
+	case http.StatusForbidden:
+		return ErrUnauthorized
+
+	default:
 		var err Error
 		if err := json.Unmarshal(data, &err); err != nil {
 			return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
 		}
-		return &err
 
-	default:
-		return fmt.Errorf("failed: response: %s", string(data))
+		return &err
 	}
 }
