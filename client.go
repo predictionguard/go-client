@@ -17,6 +17,7 @@ import (
 	"time"
 )
 
+// ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
 // This provides a default client configuration and is set with reasonable
