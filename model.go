@@ -22,12 +22,6 @@ type Message struct {
 type Choice struct {
 	Index   int     `json:"index"`
 	Message Message `json:"message"`
-	Delta   struct {
-		Content string `json:"content"`
-	} `json:"delta"`
-	Text         string  `json:"generated_text"`
-	Probs        float32 `json:"logprobs"`
-	FinishReason string  `json:"finish_reason"`
 }
 
 // ChatCompletionRequest represents the result for the chat completion call.
@@ -37,4 +31,21 @@ type ChatCompletion struct {
 	Created Time     `json:"created"`
 	Model   string   `json:"model"`
 	Choices []Choice `json:"choices"`
+}
+
+// ChoiceSSE represent the choices that are provided for you to choose from.
+type ChoiceSSE struct {
+	Index int `json:"index"`
+	Delta struct {
+		Content string `json:"content"`
+	} `json:"delta"`
+	Text         string  `json:"generated_text"`
+	Probs        float32 `json:"logprobs"`
+	FinishReason string  `json:"finish_reason"`
+}
+
+// ChatCompletionSSE represents the result for the chat completion call.
+type ChatCompletionSSE struct {
+	ChatCompletion
+	Choices []ChoiceSSE `json:"choices"`
 }

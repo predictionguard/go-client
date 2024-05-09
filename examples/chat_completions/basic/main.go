@@ -33,19 +33,19 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	messages := []client.Message{
+	input := []client.Message{
 		{
 			Role:    client.RoleUser,
 			Content: "How do you feel about the world in general",
 		},
 	}
 
-	resp, err := cln.ChatCompletions(ctx, "Neural-Chat-7B", messages, 1000, 1.1)
+	resp, err := cln.ChatCompletions(ctx, "Neural-Chat-7B", input, 1000, 1.1)
 	if err != nil {
 		return fmt.Errorf("chatcomp: %w", err)
 	}
 
-	log.Printf("res: %v\n", resp)
+	log.Printf(resp.Choices[0].Message.Content)
 
 	return nil
 }

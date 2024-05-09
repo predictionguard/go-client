@@ -74,148 +74,47 @@ func WithClient(http *http.Client) func(cln *Client) {
 	}
 }
 
-// =============================================================================
-
-func (cln *Client) rawRequest(ctx context.Context, method string, endpoint string, body any, v any) error {
-	var statusCode int
-
-	u, err := url.Parse(endpoint)
+func (cln *Client) request(ctx context.Context, method string, endpoint string, body any, v any) error {
+	resp, err := rawRequest(ctx, cln, method, endpoint, body)
 	if err != nil {
-		return fmt.Errorf("parsing endpoint: %w", err)
-	}
-	base := path.Base(u.Path)
-
-	cln.log(ctx, "go-client: rawRequest: started", "method", method, "call", base, "endpoint", endpoint)
-	defer func() {
-		cln.log(ctx, "go-client: rawRequest: completed", "status", statusCode)
-	}()
-
-	var b bytes.Buffer
-	if body != nil {
-		if err := json.NewEncoder(&b).Encode(body); err != nil {
-			return fmt.Errorf("encoding error: %w", err)
-		}
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, endpoint, &b)
-	if err != nil {
-		return fmt.Errorf("create request error: %w", err)
-	}
-
-	req.Header.Set("Cache-Control", "no-cache")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("x-api-key", cln.apiKey)
-
-	resp, err := cln.http.Do(req)
-	if err != nil {
-		return fmt.Errorf("do: error: %w", err)
+		return err
 	}
 	defer resp.Body.Close()
-
-	// Assign for logging the status code at the end of the function call.
-	statusCode = resp.StatusCode
-
-	if statusCode == http.StatusNoContent {
-		return nil
-	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("copy error: %w", err)
 	}
 
-	switch statusCode {
-	case http.StatusNoContent:
-		return nil
-
-	case http.StatusOK:
-		switch d := v.(type) {
-		case *string:
-			*d = string(data)
-
-		default:
-			if err := json.Unmarshal(data, v); err != nil {
-				return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
-			}
-		}
-
-		return nil
-
-	case http.StatusForbidden:
-		return ErrUnauthorized
+	switch d := v.(type) {
+	case *string:
+		*d = string(data)
 
 	default:
-		var err Error
-		if err := json.Unmarshal(data, &err); err != nil {
+		if err := json.Unmarshal(data, v); err != nil {
 			return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
 		}
-
-		return &err
 	}
+
+	return nil
 }
+
+// =============================================================================
 
 type sseClient[T any] struct {
 	*Client
 }
 
-func (cln *sseClient[T]) rawRequest(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
-	var statusCode int
+func newSSEClient[T any](cln *Client) sseClient[T] {
+	return sseClient[T]{
+		Client: cln,
+	}
+}
 
-	u, err := url.Parse(endpoint)
+func (cln *sseClient[T]) request(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
+	resp, err := rawRequest(ctx, cln.Client, method, endpoint, body)
 	if err != nil {
-		return fmt.Errorf("parsing endpoint: %w", err)
-	}
-	base := path.Base(u.Path)
-
-	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "call", base, "endpoint", endpoint)
-	defer func() {
-		cln.log(ctx, "go-sse: rawRequest: completed", "status", statusCode)
-	}()
-
-	var b bytes.Buffer
-	if body != nil {
-		if err := json.NewEncoder(&b).Encode(body); err != nil {
-			return fmt.Errorf("encoding error: %w", err)
-		}
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, endpoint, &b)
-	if err != nil {
-		return fmt.Errorf("create request error: %w", err)
-	}
-
-	req.Header.Set("Cache-Control", "no-cache")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("x-api-key", cln.apiKey)
-
-	resp, err := cln.http.Do(req)
-	if err != nil {
-		return fmt.Errorf("do: error: %w", err)
-	}
-
-	// Assign for logging the status code at the end of the function call.
-	statusCode = resp.StatusCode
-
-	if statusCode != http.StatusOK {
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("copy error: %w", err)
-		}
-
-		switch statusCode {
-		case http.StatusForbidden:
-			return ErrUnauthorized
-
-		default:
-			var err Error
-			if err := json.Unmarshal(data, &err); err != nil {
-				return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
-			}
-
-			return &err
-		}
+		return err
 	}
 
 	go func(ctx context.Context) {
@@ -243,12 +142,16 @@ func (cln *sseClient[T]) rawRequest(ctx context.Context, method string, endpoint
 				break
 			}
 
+			ticker := time.NewTicker(time.Second)
+
 			select {
 			case ch <- v:
-			default:
+			case <-ticker.C:
 				fmt.Println("DROP")
 				cln.log(ctx, "go-sse: rawRequest:", "ERROR", "dropping response")
 			}
+
+			ticker.Reset(time.Second)
 		}
 
 		defer resp.Body.Close()
@@ -256,4 +159,68 @@ func (cln *sseClient[T]) rawRequest(ctx context.Context, method string, endpoint
 	}(ctx)
 
 	return nil
+}
+
+// =============================================================================
+
+func rawRequest(ctx context.Context, cln *Client, method string, endpoint string, body any) (*http.Response, error) {
+	var statusCode int
+
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("parsing endpoint: %w", err)
+	}
+	base := path.Base(u.Path)
+
+	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "call", base, "endpoint", endpoint)
+	defer func() {
+		cln.log(ctx, "go-sse: rawRequest: completed", "status", statusCode)
+	}()
+
+	var b bytes.Buffer
+	if body != nil {
+		if err := json.NewEncoder(&b).Encode(body); err != nil {
+			return nil, fmt.Errorf("encoding error: %w", err)
+		}
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, &b)
+	if err != nil {
+		return nil, fmt.Errorf("create request error: %w", err)
+	}
+
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("x-api-key", cln.apiKey)
+
+	resp, err := cln.http.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("do: error: %w", err)
+	}
+
+	// Assign for logging the status code at the end of the function call.
+	statusCode = resp.StatusCode
+
+	if statusCode != http.StatusOK {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("copy error: %w", err)
+		}
+
+		switch statusCode {
+		case http.StatusForbidden:
+			return nil, ErrUnauthorized
+
+		default:
+			var err Error
+			if err := json.Unmarshal(data, &err); err != nil {
+				return nil, fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
+			}
+
+			return nil, &err
+		}
+	}
+
+	return resp, nil
 }
