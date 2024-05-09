@@ -11,8 +11,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
-	"path"
 	"strings"
 	"time"
 )
@@ -167,13 +165,7 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 func do(ctx context.Context, cln *Client, method string, endpoint string, body any) (*http.Response, error) {
 	var statusCode int
 
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, fmt.Errorf("parsing endpoint: %w", err)
-	}
-	base := path.Base(u.Path)
-
-	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "call", base, "endpoint", endpoint)
+	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "endpoint", endpoint)
 	defer func() {
 		cln.log(ctx, "go-sse: rawRequest: completed", "status", statusCode)
 	}()
@@ -219,7 +211,7 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 				return nil, fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
 			}
 
-			return nil, &err
+			return nil, fmt.Errorf("failed: response: %s", err.Message)
 		}
 	}
 

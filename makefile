@@ -16,37 +16,51 @@ curl-chatcomp:
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-  "model": "Neural-Chat-7B", \
-  "messages": [ \
-    { \
-      "role": "user", \
-      "content": "How do you feel about the world in general" \
-    } \
-  ], \
-  "max_tokens": 1000, \
-  "temperature": 1.1 \
-}'
+		"model": "Neural-Chat-7B", \
+		"messages": [ \
+			{ \
+			"role": "user", \
+			"content": "How do you feel about the world in general" \
+			} \
+		], \
+		"max_tokens": 1000, \
+		"temperature": 1.1 \
+	}'
 
 curl-chatcomp-sse:
 	curl -il -X POST https://api.predictionguard.com/chat/completions \
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-  "model": "Neural-Chat-7B", \
-  "messages": [ \
-    { \
-      "role": "user", \
-      "content": "How do you feel about the world in general" \
-    } \
-  ], \
-  "stream": true \
-}'
+		"model": "Neural-Chat-7B", \
+		"messages": [ \
+			{ \
+			"role": "user", \
+			"content": "How do you feel about the world in general" \
+			} \
+		], \
+		"stream": true \
+	}'
 
 go-chatcomp:
 	go run examples/chat_completions/basic/main.go
 
 go-chatcomp-sse:
 	go run examples/chat_completions/sse/main.go
+
+curl-comp:
+	curl -il -X POST https://api.predictionguard.com/completions \
+     -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"model": "Neural-Chat-7B", \
+		"prompt": "Will I lose my hair", \
+		"max_tokens": 1000, \
+		"temperature": 1.1 \
+	}'
+
+go-comp:
+	go run examples/completions/basic/main.go
 
 # ==============================================================================
 # Modules support
