@@ -9,7 +9,7 @@ import (
 // HealthCheck validates the PG API Service is available.
 func (cln *Client) HealthCheck(ctx context.Context) (string, error) {
 	var resp string
-	if err := cln.request(ctx, http.MethodGet, cln.host, nil, &resp); err != nil {
+	if err := cln.do(ctx, http.MethodGet, cln.host, nil, &resp); err != nil {
 		return "", err
 	}
 
@@ -33,7 +33,7 @@ func (cln *Client) ChatCompletions(ctx context.Context, model string, messages [
 	}
 
 	var resp ChatCompletion
-	if err := cln.request(ctx, http.MethodPost, url, body, &resp); err != nil {
+	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
 		return ChatCompletion{}, err
 	}
 
@@ -60,7 +60,7 @@ func (cln *Client) ChatCompletionsSSE(ctx context.Context, model string, input [
 
 	sse := newSSEClient[ChatCompletionSSE](cln)
 
-	if err := sse.request(ctx, http.MethodPost, url, body, ch); err != nil {
+	if err := sse.do(ctx, http.MethodPost, url, body, ch); err != nil {
 		return err
 	}
 

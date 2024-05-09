@@ -75,8 +75,8 @@ func WithClient(http *http.Client) func(cln *Client) {
 	}
 }
 
-func (cln *Client) request(ctx context.Context, method string, endpoint string, body any, v any) error {
-	resp, err := rawRequest(ctx, cln, method, endpoint, body)
+func (cln *Client) do(ctx context.Context, method string, endpoint string, body any, v any) error {
+	resp, err := do(ctx, cln, method, endpoint, body)
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,8 @@ func newSSEClient[T any](cln *Client) sseClient[T] {
 	}
 }
 
-func (cln *sseClient[T]) request(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
-	resp, err := rawRequest(ctx, cln.Client, method, endpoint, body)
+func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
+	resp, err := do(ctx, cln.Client, method, endpoint, body)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (cln *sseClient[T]) request(ctx context.Context, method string, endpoint st
 
 // =============================================================================
 
-func rawRequest(ctx context.Context, cln *Client, method string, endpoint string, body any) (*http.Response, error) {
+func do(ctx context.Context, cln *Client, method string, endpoint string, body any) (*http.Response, error) {
 	var statusCode int
 
 	u, err := url.Parse(endpoint)
