@@ -30,7 +30,7 @@ func run() error {
 
 	cln := client.New(logger, host, apiKey)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	messages := []client.Message{
@@ -40,7 +40,7 @@ func run() error {
 		},
 	}
 
-	resp, err := cln.ChatCompletions(ctx, "Neural-Chat-7B", messages, 10, 1.1)
+	resp, err := cln.ChatCompletions(ctx, "Neural-Chat-7B", messages, 1000, 1.1)
 	if err != nil {
 		return fmt.Errorf("chatcomp: %w", err)
 	}

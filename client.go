@@ -2,6 +2,7 @@
 package client
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -152,4 +153,107 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 
 		return &err
 	}
+}
+
+type sseClient[T any] struct {
+	*Client
+}
+
+func (cln *sseClient[T]) rawRequest(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
+	var statusCode int
+
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return fmt.Errorf("parsing endpoint: %w", err)
+	}
+	base := path.Base(u.Path)
+
+	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "call", base, "endpoint", endpoint)
+	defer func() {
+		cln.log(ctx, "go-sse: rawRequest: completed", "status", statusCode)
+	}()
+
+	var b bytes.Buffer
+	if body != nil {
+		if err := json.NewEncoder(&b).Encode(body); err != nil {
+			return fmt.Errorf("encoding error: %w", err)
+		}
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, &b)
+	if err != nil {
+		return fmt.Errorf("create request error: %w", err)
+	}
+
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("x-api-key", cln.apiKey)
+
+	resp, err := cln.http.Do(req)
+	if err != nil {
+		return fmt.Errorf("do: error: %w", err)
+	}
+
+	// Assign for logging the status code at the end of the function call.
+	statusCode = resp.StatusCode
+
+	if statusCode != http.StatusOK {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("copy error: %w", err)
+		}
+
+		switch statusCode {
+		case http.StatusForbidden:
+			return ErrUnauthorized
+
+		default:
+			var err Error
+			if err := json.Unmarshal(data, &err); err != nil {
+				return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
+			}
+
+			return &err
+		}
+	}
+
+	go func(ctx context.Context) {
+		scanner := bufio.NewScanner(resp.Body)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if line == "" || line == "data: [DONE]" {
+				continue
+			}
+
+			if ctx.Err() != nil {
+				cln.log(ctx, "go-sse: rawRequest:", "ERROR", ctx.Err())
+				break
+			}
+
+			var v T
+
+			if err := json.Unmarshal([]byte(line[6:]), &v); err != nil {
+				cln.log(ctx, "go-sse: rawRequest:", "ERROR", err)
+				break
+			}
+
+			if ctx.Err() != nil {
+				cln.log(ctx, "go-sse: rawRequest:", "ERROR", ctx.Err())
+				break
+			}
+
+			select {
+			case ch <- v:
+			default:
+				fmt.Println("DROP")
+				cln.log(ctx, "go-sse: rawRequest:", "ERROR", "dropping response")
+			}
+		}
+
+		defer resp.Body.Close()
+		close(ch)
+	}(ctx)
+
+	return nil
 }

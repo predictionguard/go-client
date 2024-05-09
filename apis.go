@@ -39,3 +39,28 @@ func (cln *Client) ChatCompletions(ctx context.Context, model string, messages [
 
 	return resp, nil
 }
+
+// ChatCompletionsSSE generate chat completions based on a conversation history.
+func (cln *Client) ChatCompletionsSSE(ctx context.Context, model string, messages []Message, maxTokens int, temperature float32, ch chan ChatCompletion) error {
+	url := fmt.Sprintf("%s/chat/completions", cln.host)
+
+	body := struct {
+		Model    string    `json:"model"`
+		Messages []Message `json:"messages"`
+		Stream   bool      `json:"stream"`
+	}{
+		Model:    model,
+		Messages: messages,
+		Stream:   true,
+	}
+
+	sse := sseClient[ChatCompletion]{
+		Client: cln,
+	}
+
+	if err := sse.rawRequest(ctx, http.MethodPost, url, body, ch); err != nil {
+		return err
+	}
+
+	return nil
+}
