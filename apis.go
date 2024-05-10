@@ -18,15 +18,15 @@ func (cln *Client) HealthCheck(ctx context.Context) (string, error) {
 
 // =============================================================================
 
-// ChatCompletions generate chat completions based on a conversation history.
-func (cln *Client) ChatCompletions(ctx context.Context, model string, messages []Message, maxTokens int, temperature float32) (ChatCompletion, error) {
+// Chat generate chat completions based on a conversation history.
+func (cln *Client) Chat(ctx context.Context, model string, messages []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	body := struct {
-		Model       string    `json:"model"`
-		Messages    []Message `json:"messages"`
-		MaxTokens   int       `json:"max_tokens"`
-		Temperature float32   `json:"temperature"`
+		Model       string        `json:"model"`
+		Messages    []ChatMessage `json:"messages"`
+		MaxTokens   int           `json:"max_tokens"`
+		Temperature float32       `json:"temperature"`
 	}{
 		Model:       model,
 		Messages:    messages,
@@ -34,24 +34,24 @@ func (cln *Client) ChatCompletions(ctx context.Context, model string, messages [
 		Temperature: temperature,
 	}
 
-	var resp ChatCompletion
+	var resp Chat
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
-		return ChatCompletion{}, err
+		return Chat{}, err
 	}
 
 	return resp, nil
 }
 
-// ChatCompletionsSSE generate chat completions based on a conversation history.
-func (cln *Client) ChatCompletionsSSE(ctx context.Context, model string, input []Message, maxTokens int, temperature float32, ch chan ChatCompletionSSE) error {
+// ChatSSE generate chat completions based on a conversation history.
+func (cln *Client) ChatSSE(ctx context.Context, model string, input []ChatMessage, maxTokens int, temperature float32, ch chan ChatSSE) error {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	body := struct {
-		Model       string    `json:"model"`
-		Messages    []Message `json:"messages"`
-		Stream      bool      `json:"stream"`
-		MaxTokens   int       `json:"max_tokens"`
-		Temperature float32   `json:"temperature"`
+		Model       string        `json:"model"`
+		Messages    []ChatMessage `json:"messages"`
+		MaxTokens   int           `json:"max_tokens"`
+		Temperature float32       `json:"temperature"`
+		Stream      bool          `json:"stream"`
 	}{
 		Model:       model,
 		Messages:    input,
@@ -60,7 +60,7 @@ func (cln *Client) ChatCompletionsSSE(ctx context.Context, model string, input [
 		Stream:      true,
 	}
 
-	sse := newSSEClient[ChatCompletionSSE](cln)
+	sse := newSSEClient[ChatSSE](cln)
 
 	if err := sse.do(ctx, http.MethodPost, url, body, ch); err != nil {
 		return err
