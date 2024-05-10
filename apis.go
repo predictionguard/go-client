@@ -94,3 +94,25 @@ func (cln *Client) Completions(ctx context.Context, model string, prompt string,
 
 	return resp, nil
 }
+
+// =============================================================================
+
+// Factuality checks the factuality of a given text compared to a reference.
+func (cln *Client) Factuality(ctx context.Context, reference string, text string) (Factuality, error) {
+	url := fmt.Sprintf("%s/factuality", cln.host)
+
+	body := struct {
+		Reference string `json:"reference"`
+		Text      string `json:"text"`
+	}{
+		Reference: reference,
+		Text:      text,
+	}
+
+	var resp Factuality
+	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
+		return Factuality{}, err
+	}
+
+	return resp, nil
+}

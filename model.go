@@ -69,3 +69,21 @@ type Completion struct {
 	Created Time               `json:"created"`
 	Choices []CompletionChoice `json:"choices"`
 }
+
+// =============================================================================
+// Factuality
+
+// FactualityCheck represents the response for factuality.
+type FactualityCheck struct {
+	Score  float64 `json:"score"`
+	Index  int     `json:"index"`
+	Status string  `json:"status"`
+}
+
+// Factuality represents the result for the factuality call.
+type Factuality struct {
+	ID      string            `json:"id"`
+	Object  string            `json:"object"`
+	Created Time              `json:"created"`
+	Checks  []FactualityCheck `json:"checks"`
+}
