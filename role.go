@@ -5,7 +5,7 @@ import "fmt"
 // Set of known roles.
 var roles = make(map[string]Role)
 
-// Set of possible roles for a user.
+// Set of possible roles.
 var (
 	RoleUser      = newRole("user")
 	RoleAssistant = newRole("assistant")

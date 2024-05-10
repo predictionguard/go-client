@@ -117,6 +117,14 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 	}
 
 	go func(ctx context.Context) {
+		ticker := time.NewTicker(5 * time.Second)
+
+		defer func() {
+			resp.Body.Close()
+			ticker.Stop()
+			close(ch)
+		}()
+
 		scanner := bufio.NewScanner(resp.Body)
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -124,37 +132,29 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 				continue
 			}
 
-			if ctx.Err() != nil {
-				cln.log(ctx, "go-sse: rawRequest:", "ERROR", ctx.Err())
-				break
-			}
-
 			var v T
-
 			if err := json.Unmarshal([]byte(line[6:]), &v); err != nil {
 				cln.log(ctx, "go-sse: rawRequest:", "ERROR", err)
 				break
 			}
 
-			if ctx.Err() != nil {
-				cln.log(ctx, "go-sse: rawRequest:", "ERROR", ctx.Err())
-				break
-			}
-
-			ticker := time.NewTicker(time.Second)
-
 			select {
 			case ch <- v:
+
+			case <-ctx.Done():
+				cln.log(ctx, "go-sse: rawRequest:", "Context", err)
+
 			case <-ticker.C:
-				fmt.Println("DROP")
-				cln.log(ctx, "go-sse: rawRequest:", "ERROR", "dropping response")
+				cln.log(ctx, "go-sse: rawRequest:", "WARNING", "timeout waiting for a receiver")
+			}
+
+			if ctx.Err() != nil {
+				break
 			}
 
 			ticker.Reset(time.Second)
 		}
 
-		defer resp.Body.Close()
-		close(ch)
 	}(ctx)
 
 	return nil

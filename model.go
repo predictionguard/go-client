@@ -87,3 +87,31 @@ type Factuality struct {
 	Created Time              `json:"created"`
 	Checks  []FactualityCheck `json:"checks"`
 }
+
+// =============================================================================
+// Translate
+
+// Translate represents the result for the translate call.
+type Translate struct {
+	BestTranslation string  `json:"best_translation"`
+	Score           float64 `json:"score"`
+}
+
+// =============================================================================
+// Replace Personal Information
+
+// RPICheck represents the response for rpi.
+type RPICheck struct {
+	Prompt float64 `json:"new_prompt"`
+	Index  int     `json:"index"`
+	Status string  `json:"status"`
+}
+
+// ReplacePersonalInformation replaces personal information such as names,
+// SSNs, and emails in a given text.
+type ReplacePersonalInformation struct {
+	ID      string     `json:"id"`
+	Object  string     `json:"object"`
+	Created Time       `json:"created"`
+	Checks  []RPICheck `json:"checks"`
+}

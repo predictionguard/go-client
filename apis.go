@@ -116,3 +116,63 @@ func (cln *Client) Factuality(ctx context.Context, reference string, text string
 
 	return resp, nil
 }
+
+// =============================================================================
+
+// Translate converts text from one language to another.
+func (cln *Client) Translate(ctx context.Context, text string, source Language, target Language) (Translate, error) {
+	url := fmt.Sprintf("%s/translate", cln.host)
+
+	body := struct {
+		Text   string   `json:"text"`
+		Source Language `json:"source_lang"`
+		Target Language `json:"target_lang"`
+	}{
+		Text:   text,
+		Source: source,
+		Target: target,
+	}
+
+	var resp struct {
+		Response struct {
+			BestTranslation string  `json:"best_translation"`
+			Score           float64 `json:"score"`
+		} `json:"response"`
+	}
+
+	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
+		return Translate{}, err
+	}
+
+	trn := Translate{
+		BestTranslation: resp.Response.BestTranslation,
+		Score:           resp.Response.Score,
+	}
+
+	return trn, nil
+}
+
+// =============================================================================
+
+// ReplacePersonalInformation replaces personal information such as names, SSNs,
+// and emails in a given text.
+func (cln *Client) ReplacePersonalInformation(ctx context.Context, prompt string, replace bool, method ReplaceMethod) (ReplacePersonalInformation, error) {
+	url := fmt.Sprintf("%s/translate", cln.host)
+
+	body := struct {
+		Prompt  string        `json:"prompt"`
+		Replace bool          `json:"replace"`
+		Method  ReplaceMethod `json:"replace_method"`
+	}{
+		Prompt:  prompt,
+		Replace: replace,
+		Method:  method,
+	}
+
+	var resp ReplacePersonalInformation
+	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
+		return ReplacePersonalInformation{}, err
+	}
+
+	return resp, nil
+}
