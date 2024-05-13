@@ -15,6 +15,18 @@ import (
 	"time"
 )
 
+// Error represents an error in the system.
+type Error struct {
+	Message string `json:"error"`
+}
+
+// Error implements the error interface.
+func (err *Error) Error() string {
+	return err.Message
+}
+
+// =============================================================================
+
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
@@ -40,6 +52,8 @@ var defaultClient = http.Client{
 // Logger represents a function that will be called to add information
 // to the user's application logs.
 type Logger func(context.Context, string, ...any)
+
+// =============================================================================
 
 // Client represents a client that can talk to the PG API service.
 type Client struct {
