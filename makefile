@@ -11,7 +11,7 @@ curl-health:
 go-health:
 	go run examples/healthcheck/main.go
 
-curl-chatcomp:
+curl-chat:
 	curl -il -X POST https://api.predictionguard.com/chat/completions \
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
@@ -27,7 +27,7 @@ curl-chatcomp:
 		"temperature": 1.1 \
 	}'
 
-curl-chatcomp-sse:
+curl-chat-sse:
 	curl -il -X POST https://api.predictionguard.com/chat/completions \
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
@@ -42,11 +42,11 @@ curl-chatcomp-sse:
 		"stream": true \
 	}'
 
-go-chatcomp:
-	go run examples/chat_completions/basic/main.go
+go-chat:
+	go run examples/chat/basic/main.go
 
-go-chatcomp-sse:
-	go run examples/chat_completions/sse/main.go
+go-chat-sse:
+	go run examples/chat/sse/main.go
 
 curl-comp:
 	curl -il -X POST https://api.predictionguard.com/completions \

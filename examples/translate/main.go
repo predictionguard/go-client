@@ -35,7 +35,7 @@ func run() error {
 
 	text := "The rain in Spain stays mainly in the plain"
 
-	resp, err := cln.Translate(ctx, text, client.LangEnglish, client.LangSpanish)
+	resp, err := cln.Translate(ctx, text, client.Languages.English, client.Languages.Spanish)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

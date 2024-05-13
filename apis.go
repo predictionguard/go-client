@@ -19,7 +19,7 @@ func (cln *Client) HealthCheck(ctx context.Context) (string, error) {
 // =============================================================================
 
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, model string, messages []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, model Model, messages []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	body := struct {
@@ -28,7 +28,7 @@ func (cln *Client) Chat(ctx context.Context, model string, messages []ChatMessag
 		MaxTokens   int           `json:"max_tokens"`
 		Temperature float32       `json:"temperature"`
 	}{
-		Model:       model,
+		Model:       model.name,
 		Messages:    messages,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,

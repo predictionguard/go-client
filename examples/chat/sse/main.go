@@ -35,7 +35,7 @@ func run() error {
 
 	input := []client.ChatMessage{
 		{
-			Role:    client.RoleUser,
+			Role:    client.Roles.User,
 			Content: "How do you feel about the world in general",
 		},
 	}

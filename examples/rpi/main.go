@@ -35,7 +35,7 @@ func run() error {
 
 	text := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-	resp, err := cln.ReplacePersonalInformation(ctx, text, client.ReplaceMethodMask)
+	resp, err := cln.ReplacePersonalInformation(ctx, text, client.ReplaceMethods.Mask)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

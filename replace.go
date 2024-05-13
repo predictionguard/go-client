@@ -2,16 +2,21 @@ package client
 
 import "fmt"
 
+// ReplaceMethods represents the set of replace methods that can be used.
+var ReplaceMethods = struct {
+	Random   ReplaceMethod
+	Fake     ReplaceMethod
+	Category ReplaceMethod
+	Mask     ReplaceMethod
+}{
+	Random:   newReplaceMethod("random"),
+	Fake:     newReplaceMethod("fake"),
+	Category: newReplaceMethod("category"),
+	Mask:     newReplaceMethod("mask"),
+}
+
 // Set of known replace methods.
 var replaceMethods = make(map[string]ReplaceMethod)
-
-// Set of possible replace methods.
-var (
-	ReplaceMethodRandom   = newReplaceMethod("random")
-	ReplaceMethodFake     = newReplaceMethod("fake")
-	ReplaceMethodCategory = newReplaceMethod("category")
-	ReplaceMethodMask     = newReplaceMethod("mask")
-)
 
 // ReplaceMethod represents a replace method in the system.
 type ReplaceMethod struct {

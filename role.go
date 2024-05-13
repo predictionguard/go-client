@@ -2,14 +2,17 @@ package client
 
 import "fmt"
 
+// Roles represents the set of roles that can be used.
+var Roles = struct {
+	User      Role
+	Assistant Role
+}{
+	User:      newRole("user"),
+	Assistant: newRole("assistant"),
+}
+
 // Set of known roles.
 var roles = make(map[string]Role)
-
-// Set of possible roles.
-var (
-	RoleUser      = newRole("user")
-	RoleAssistant = newRole("assistant")
-)
 
 // Role represents a role in the system.
 type Role struct {

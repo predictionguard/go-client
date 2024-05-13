@@ -2,83 +2,155 @@ package client
 
 import "fmt"
 
+// Languages represents the set of languages that can be used.
+var Languages = struct {
+	Afrikanns  Language
+	Amharic    Language
+	Arabic     Language
+	Armenian   Language
+	Azerbaijan Language
+	Basque     Language
+	Belarusian Language
+	Bengali    Language
+	Bosnian    Language
+	Catalan    Language
+	Chechen    Language
+	Cherokee   Language
+	Chinese    Language
+	Croatian   Language
+	Czech      Language
+	Danish     Language
+	Dutch      Language
+	English    Language
+	Estonian   Language
+	Fijian     Language
+	Filipino   Language
+	Finnish    Language
+	French     Language
+	Galician   Language
+	Georgian   Language
+	German     Language
+	Greek      Language
+	Gujarati   Language
+	Haitian    Language
+	Hebrew     Language
+	Hindi      Language
+	Hungarian  Language
+	Icelandic  Language
+	Indonesian Language
+	Irish      Language
+	Italian    Language
+	Japanese   Language
+	Kannada    Language
+	Kazakh     Language
+	Korean     Language
+	Latvian    Language
+	Lithuanian Language
+	Macedonian Language
+	Malay1     Language
+	Malay2     Language
+	Malayalam  Language
+	Maltese    Language
+	Marathi    Language
+	Nepali     Language
+	Norwegian  Language
+	Persian    Language
+	Polish     Language
+	Portuguese Language
+	Romanian   Language
+	Russian    Language
+	Samoan     Language
+	Serbian    Language
+	Slovak     Language
+	Slovenian  Language
+	Slavonic   Language
+	Spanish    Language
+	Swahili    Language
+	Swedish    Language
+	Tamil      Language
+	Telugu     Language
+	Thai       Language
+	Turkish    Language
+	Ukrainian  Language
+	Urdu       Language
+	Welsh      Language
+	Vietnamese Language
+}{
+	Afrikanns:  newLanguage("afr"),
+	Amharic:    newLanguage("amh"),
+	Arabic:     newLanguage("ara"),
+	Armenian:   newLanguage("hye"),
+	Azerbaijan: newLanguage("aze"),
+	Basque:     newLanguage("eus"),
+	Belarusian: newLanguage("bel"),
+	Bengali:    newLanguage("ben"),
+	Bosnian:    newLanguage("bos"),
+	Catalan:    newLanguage("cat"),
+	Chechen:    newLanguage("che"),
+	Cherokee:   newLanguage("chr"),
+	Chinese:    newLanguage("zho"),
+	Croatian:   newLanguage("hrv"),
+	Czech:      newLanguage("ces"),
+	Danish:     newLanguage("dan"),
+	Dutch:      newLanguage("nld"),
+	English:    newLanguage("eng"),
+	Estonian:   newLanguage("est"),
+	Fijian:     newLanguage("fij"),
+	Filipino:   newLanguage("fil"),
+	Finnish:    newLanguage("fin"),
+	French:     newLanguage("fra"),
+	Galician:   newLanguage("glg"),
+	Georgian:   newLanguage("kat"),
+	German:     newLanguage("deu"),
+	Greek:      newLanguage("ell"),
+	Gujarati:   newLanguage("guj"),
+	Haitian:    newLanguage("hat"),
+	Hebrew:     newLanguage("heb"),
+	Hindi:      newLanguage("hin"),
+	Hungarian:  newLanguage("hun"),
+	Icelandic:  newLanguage("isl"),
+	Indonesian: newLanguage("ind"),
+	Irish:      newLanguage("gle"),
+	Italian:    newLanguage("ita"),
+	Japanese:   newLanguage("jpn"),
+	Kannada:    newLanguage("kan"),
+	Kazakh:     newLanguage("kaz"),
+	Korean:     newLanguage("kor"),
+	Latvian:    newLanguage("lav"),
+	Lithuanian: newLanguage("lit"),
+	Macedonian: newLanguage("mkd"),
+	Malay1:     newLanguage("msa"),
+	Malay2:     newLanguage("zlm"),
+	Malayalam:  newLanguage("mal"),
+	Maltese:    newLanguage("mlt"),
+	Marathi:    newLanguage("mar"),
+	Nepali:     newLanguage("nep"),
+	Norwegian:  newLanguage("nor"),
+	Persian:    newLanguage("fas"),
+	Polish:     newLanguage("pol"),
+	Portuguese: newLanguage("por"),
+	Romanian:   newLanguage("ron"),
+	Russian:    newLanguage("rus"),
+	Samoan:     newLanguage("smo"),
+	Serbian:    newLanguage("srp"),
+	Slovak:     newLanguage("slk"),
+	Slovenian:  newLanguage("slv"),
+	Slavonic:   newLanguage("chu"),
+	Spanish:    newLanguage("spa"),
+	Swahili:    newLanguage("swh"),
+	Swedish:    newLanguage("swe"),
+	Tamil:      newLanguage("tam"),
+	Telugu:     newLanguage("tel"),
+	Thai:       newLanguage("tha"),
+	Turkish:    newLanguage("tur"),
+	Ukrainian:  newLanguage("ukr"),
+	Urdu:       newLanguage("urd"),
+	Welsh:      newLanguage("cym"),
+	Vietnamese: newLanguage("vie"),
+}
+
 // Set of known languages.
 var languages = make(map[string]Language)
-
-// Set of possible languages.
-var (
-	LangAfrikanns   = newLanguage("afr")
-	LangAmharic     = newLanguage("amh")
-	LangArabic      = newLanguage("ara")
-	LangArmenian    = newLanguage("hye")
-	LangAzerbaijani = newLanguage("aze")
-	LangBasque      = newLanguage("eus")
-	LangBelarusian  = newLanguage("bel")
-	LangBengali     = newLanguage("ben")
-	LangBosnian     = newLanguage("bos")
-	LangCatalan     = newLanguage("cat")
-	LangChechen     = newLanguage("che")
-	LangCherokee    = newLanguage("chr")
-	LangChinese     = newLanguage("zho")
-	LangCroatian    = newLanguage("hrv")
-	LangCzech       = newLanguage("ces")
-	LangDanish      = newLanguage("dan")
-	LangDutch       = newLanguage("nld")
-	LangEnglish     = newLanguage("eng")
-	LangEstonian    = newLanguage("est")
-	LangFijian      = newLanguage("fij")
-	LangFilipino    = newLanguage("fil")
-	LangFinnish     = newLanguage("fin")
-	LangFrench      = newLanguage("fra")
-	LangGalician    = newLanguage("glg")
-	LangGeorgian    = newLanguage("kat")
-	LangGerman      = newLanguage("deu")
-	LangGreek       = newLanguage("ell")
-	LangGujarati    = newLanguage("guj")
-	LangHaitian     = newLanguage("hat")
-	LangHebrew      = newLanguage("heb")
-	LangHindi       = newLanguage("hin")
-	LangHungarian   = newLanguage("hun")
-	LangIcelandic   = newLanguage("isl")
-	LangIndonesian  = newLanguage("ind")
-	LangIrish       = newLanguage("gle")
-	LangItalian     = newLanguage("ita")
-	LangJapanese    = newLanguage("jpn")
-	LangKannada     = newLanguage("kan")
-	LangKazakh      = newLanguage("kaz")
-	LangKorean      = newLanguage("kor")
-	LangLatvian     = newLanguage("lav")
-	LangLithuanian  = newLanguage("lit")
-	LangMacedonian  = newLanguage("mkd")
-	LangMalay1      = newLanguage("msa")
-	LangMalay2      = newLanguage("zlm")
-	LangMalayalam   = newLanguage("mal")
-	LangMaltese     = newLanguage("mlt")
-	LangMarathi     = newLanguage("mar")
-	LangNepali      = newLanguage("nep")
-	LangNorwegian   = newLanguage("nor")
-	LangPersian     = newLanguage("fas")
-	LangPolish      = newLanguage("pol")
-	LangPortuguese  = newLanguage("por")
-	LangRomanian    = newLanguage("ron")
-	LangRussian     = newLanguage("rus")
-	LangSamoan      = newLanguage("smo")
-	LangSerbian     = newLanguage("srp")
-	LangSlovak      = newLanguage("slk")
-	LangSlovenian   = newLanguage("slv")
-	LangSlavonic    = newLanguage("chu")
-	LangSpanish     = newLanguage("spa")
-	LangSwahili     = newLanguage("swh")
-	LangSwedish     = newLanguage("swe")
-	LangTamil       = newLanguage("tam")
-	LangTelugu      = newLanguage("tel")
-	LangThai        = newLanguage("tha")
-	LangTurkish     = newLanguage("tur")
-	LangUkrainian   = newLanguage("ukr")
-	LangUrdu        = newLanguage("urd")
-	LangWelsh       = newLanguage("cym")
-	LangVietnamese  = newLanguage("vie")
-)
 
 // Language represents a language in the system.
 type Language struct {
