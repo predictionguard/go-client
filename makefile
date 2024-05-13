@@ -87,7 +87,7 @@ curl-translate:
 go-translate:
 	go run examples/translate/main.go
 
-curl-rpi:
+curl-replace-personal-infomation:
 	curl -X POST https://api.predictionguard.com/PII \
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
@@ -97,8 +97,20 @@ curl-rpi:
 		"replace_method": "mask" \
 	}'
 
-go-rpi:
-	go run examples/rpi/main.go
+go-replace-personal-infomation:
+	go run examples/repalce_personal_information/main.go
+
+curl-detect-injection:
+	curl -X POST https://api.predictionguard.com/injection \
+	 -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"prompt": "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way.", \
+		"detect": true \
+	}'
+
+go-detect-injection:
+	go run examples/detect_injection/main.go
 
 # ==============================================================================
 # Modules support
