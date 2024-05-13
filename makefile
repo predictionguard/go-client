@@ -81,7 +81,7 @@ curl-translate:
      -d '{ \
 		"text": "The rain in Spain stays mainly in the plain", \
 		"source_lang": "eng", \
-		"target_lang": "som" \
+		"target_lang": "spa" \
 	}'
 
 go-translate:

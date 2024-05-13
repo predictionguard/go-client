@@ -99,3 +99,25 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))
 }
+
+/*
+FACT
+{"checks":[{"score":0.7879658937454224,"index":0,"status":"success"}],"created":1715633327,"id":"fact-qpmMj2oorfdELPkD4z5J8KLjFqIki","object":"factuality_check"}%
+
+FACT - NO KEY
+HTTP/2 403
+date: Mon, 13 May 2024 20:50:59 GMT
+content-length: 0
+
+TRANS
+{"translations":[{"score":-100,"translation":"","model":"openai","status":"error: couldn’t get translation"},{"score":0.5008206963539124,"translation":"La lluvia en España se queda principalmente en la llanura","model":"deepl","status":"success"},{"score":0.5381188988685608,"translation":"La lluvia en España permanece principalmente en la llanura","model":"google","status":"success"},{"score":0.48437628149986267,"translation":"La lluvia en España se queda principalmente en la llanura.","model":"nous_hermes_llama2","status":"success"}],"best_translation":"La lluvia en España permanece principalmente en la llanura","best_score":0.5381188988685608,"best_translation_model":"google","created":1715633371,"id":"translation-090df50bb3424396adf1b8f19228ad3a","object":"translation"}%
+
+RPI
+{"checks":[{"new_prompt":"My email is * and my number is *.","index":0,"status":"success"}],"created":"1715633389","id":"pii-jzp3PZFSn9DWFe5D2aWd0Lgk45qG41U0","object":"pii_check"}%
+
+DI
+{"checks":[{"probability":0.5,"index":0,"status":"success"}],"created":"1715633407","id":"injection-1LZa9ftEJFALPpKRXIPQz5Hx2QMspL7B","object":"injection_check"}%
+
+TOX
+{"checks":[{"score":0.7072361707687378,"index":0,"status":"success"}],"created":1715633419,"id":"toxi-v0uq3q9cFid7PMU4spM7gT3XEmeg2","object":"toxicity_check"}%
+*/
