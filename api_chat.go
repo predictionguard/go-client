@@ -10,6 +10,7 @@ import (
 type ChatMessage struct {
 	Role    Role   `json:"role"`
 	Content string `json:"content"`
+	Output  string `json:"output"`
 }
 
 // Chat represents the result for the chat completion call.
@@ -17,10 +18,11 @@ type Chat struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Created Time   `json:"created"`
-	Model   string `json:"model"`
+	Model   Model  `json:"model"`
 	Choices []struct {
 		Index   int         `json:"index"`
 		Message ChatMessage `json:"message"`
+		Status  string      `json:"status"`
 	} `json:"choices"`
 }
 

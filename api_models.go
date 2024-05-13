@@ -23,6 +23,16 @@ type Time struct {
 	time.Time
 }
 
+// ToTime returns the local Time corresponding to the given Unix time, sec seconds
+// and nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec
+// outside the range [0, 999999999]. Not all sec values have a corresponding time
+// value. One such value is 1<<63-1 (the largest int64 value).
+func ToTime(sec int64) Time {
+	return Time{
+		Time: time.Unix(sec, 0),
+	}
+}
+
 // UnmarshalJSON overrides the time.Time implementation so we can unmarshal
 // from epoch time.
 func (t *Time) UnmarshalJSON(data []byte) error {
