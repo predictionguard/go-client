@@ -133,23 +133,12 @@ func (cln *Client) Translate(ctx context.Context, text string, source Language, 
 		Target: target,
 	}
 
-	var resp struct {
-		Response struct {
-			BestTranslation string  `json:"best_translation"`
-			Score           float64 `json:"score"`
-		} `json:"response"`
-	}
-
+	var resp Translate
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
 		return Translate{}, err
 	}
 
-	trn := Translate{
-		BestTranslation: resp.Response.BestTranslation,
-		Score:           resp.Response.Score,
-	}
-
-	return trn, nil
+	return resp, nil
 }
 
 // =============================================================================

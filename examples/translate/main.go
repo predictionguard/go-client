@@ -33,19 +33,14 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatMessage{
-		{
-			Role:    client.RoleUser,
-			Content: "How do you feel about the world in general",
-		},
-	}
+	text := "The rain in Spain stays mainly in the plain"
 
-	resp, err := cln.Chat(ctx, "Neural-Chat-7B", input, 1000, 1.1)
+	resp, err := cln.Translate(ctx, text, client.LangEnglish, client.LangSpanish)
 	if err != nil {
-		return fmt.Errorf("chat: %w", err)
+		return fmt.Errorf("translate: %w", err)
 	}
 
-	log.Printf(resp.Choices[0].Message.Content)
+	log.Print(resp.BestTranslation)
 
 	return nil
 }

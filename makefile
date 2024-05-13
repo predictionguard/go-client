@@ -76,13 +76,16 @@ go-factuality:
 
 curl-translate:
 	curl -X POST https://api.predictionguard.com/translate \
-     -H "x-api-key: <apiKey>" \
+     -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
-     -d '{
-		"text": "The rain in Spain stays mainly in the plain",
-		"source_lang": "english",
-		"target_lang": "spanish"
+     -d '{ \
+		"text": "The rain in Spain stays mainly in the plain", \
+		"source_lang": "eng", \
+		"target_lang": "som" \
 	}'
+
+go-translate:
+	go run examples/translate/main.go
 
 # ==============================================================================
 # Modules support

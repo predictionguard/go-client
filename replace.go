@@ -44,7 +44,7 @@ func MustParseReplaceMethod(value string) Role {
 	return role
 }
 
-// Name returns the name of the role.
+// Name returns the name of the replace method.
 func (rm ReplaceMethod) Name() string {
 	return rm.name
 }

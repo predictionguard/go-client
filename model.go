@@ -91,10 +91,22 @@ type Factuality struct {
 // =============================================================================
 // Translate
 
+type TranslateChoice struct {
+	Score       float64 `json:"score"`
+	Translation string  `json:"translation"`
+	Model       string  `json:"model"`
+	Status      string  `json:"status"`
+}
+
 // Translate represents the result for the translate call.
 type Translate struct {
-	BestTranslation string  `json:"best_translation"`
-	Score           float64 `json:"score"`
+	ID                   string            `json:"id"`
+	Object               string            `json:"object"`
+	Created              Time              `json:"created"`
+	BestTranslation      string            `json:"best_translation"`
+	BestTranslationModel string            `json:"best_translation_model"`
+	Score                float64           `json:"score"`
+	Translations         []TranslateChoice `json:"translations"`
 }
 
 // =============================================================================

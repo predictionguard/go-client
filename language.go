@@ -7,18 +7,68 @@ var languages = make(map[string]Language)
 
 // Set of possible languages.
 var (
-	LangEnglish = newLanguage("english")
-	LanSpanish  = newLanguage("spanish")
+	LangArabic     = newLanguage("ara")
+	LangArmenian   = newLanguage("hye")
+	LangBelarusian = newLanguage("bel")
+	LangBengali    = newLanguage("ben")
+	LangCatalan    = newLanguage("cat")
+	LangChechen    = newLanguage("che")
+	LangChinese    = newLanguage("zho")
+	LangSlavonic   = newLanguage("chu")
+	LangCroatian   = newLanguage("hrv")
+	LangCzech      = newLanguage("ces")
+	LangDanish     = newLanguage("dan")
+	LangDutch      = newLanguage("nld")
+	LangEnglish    = newLanguage("eng")
+	LangEstonian   = newLanguage("est")
+	LangFijian     = newLanguage("fij")
+	LangFinnish    = newLanguage("fin")
+	LangFrench     = newLanguage("fra")
+	LangGeorgian   = newLanguage("kat")
+	LangGerman     = newLanguage("deu")
+	LangGreek      = newLanguage("ell")
+	LangHaitian    = newLanguage("hat")
+	LangHebrew     = newLanguage("heb")
+	LangHindi      = newLanguage("hin")
+	LangHungarian  = newLanguage("hun")
+	LangIcelandic  = newLanguage("isl")
+	LangIndonesian = newLanguage("ind")
+	LangIrish      = newLanguage("gle")
+	LangItalian    = newLanguage("ita")
+	LangJapanese   = newLanguage("jpn")
+	LangKorean     = newLanguage("kor")
+	LangLatvian    = newLanguage("lav")
+	LangLithuanian = newLanguage("lit")
+	LangMalay      = newLanguage("msa")
+	LangMalayalam  = newLanguage("mal")
+	LangMaltese    = newLanguage("mlt")
+	LangNepali     = newLanguage("nep")
+	LangNorwegian  = newLanguage("nor")
+	LangPersian    = newLanguage("fas")
+	LangPolish     = newLanguage("pol")
+	LangPortuguese = newLanguage("por")
+	LangRomanian   = newLanguage("ron")
+	LangRussian    = newLanguage("rus")
+	LangSamoan     = newLanguage("smo")
+	LangSerbian    = newLanguage("srp")
+	LangSlovak     = newLanguage("slk")
+	LangSlovenian  = newLanguage("slv")
+	LangSpanish    = newLanguage("spa")
+	LangSwedish    = newLanguage("swe")
+	LangThai       = newLanguage("tha")
+	LangTurkish    = newLanguage("tur")
+	LangUkrainian  = newLanguage("ukr")
+	LangVietnamese = newLanguage("vie")
 )
 
 // Language represents a language in the system.
 type Language struct {
-	name string
+	code string
 }
 
-func newLanguage(language string) Language {
-	l := Language{language}
-	languages[language] = l
+func newLanguage(code string) Language {
+	l := Language{code}
+	languages[code] = l
 	return l
 }
 
@@ -43,9 +93,9 @@ func MustParseLanguage(value string) Language {
 	return lang
 }
 
-// Name returns the name of the role.
-func (l Language) Name() string {
-	return l.name
+// Code returns the ISO-639 code of the language.
+func (l Language) Code() string {
+	return l.code
 }
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
@@ -55,16 +105,16 @@ func (l *Language) UnmarshalText(data []byte) error {
 		return err
 	}
 
-	l.name = lang.name
+	l.code = lang.code
 	return nil
 }
 
 // MarshalText implement the marshal interface for JSON conversions.
 func (l Language) MarshalText() ([]byte, error) {
-	return []byte(l.name), nil
+	return []byte(l.code), nil
 }
 
 // Equal provides support for the go-cmp package and testing.
 func (l Language) Equal(l2 Language) bool {
-	return l.name == l2.name
+	return l.code == l2.code
 }
