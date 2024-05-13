@@ -24,20 +24,6 @@ type Chat struct {
 	} `json:"choices"`
 }
 
-// ChatSSE represents the result for the chat completion call.
-type ChatSSE struct {
-	Chat
-	Choices []struct {
-		Index int `json:"index"`
-		Delta struct {
-			Content string `json:"content"`
-		} `json:"delta"`
-		Text         string  `json:"generated_text"`
-		Probs        float32 `json:"logprobs"`
-		FinishReason string  `json:"finish_reason"`
-	} `json:"choices"`
-}
-
 // Chat generate chat completions based on a conversation history.
 func (cln *Client) Chat(ctx context.Context, model Model, messages []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
@@ -60,6 +46,22 @@ func (cln *Client) Chat(ctx context.Context, model Model, messages []ChatMessage
 	}
 
 	return resp, nil
+}
+
+// =============================================================================
+
+// ChatSSE represents the result for the chat completion call.
+type ChatSSE struct {
+	Chat
+	Choices []struct {
+		Index int `json:"index"`
+		Delta struct {
+			Content string `json:"content"`
+		} `json:"delta"`
+		Text         string  `json:"generated_text"`
+		Probs        float32 `json:"logprobs"`
+		FinishReason string  `json:"finish_reason"`
+	} `json:"choices"`
 }
 
 // ChatSSE generate chat completions based on a conversation history.

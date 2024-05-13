@@ -112,6 +112,17 @@ curl-detect-injection:
 go-detect-injection:
 	go run examples/detect_injection/main.go
 
+curl-toxicity:
+	curl -X POST https://api.predictionguard.com/toxicity \
+     -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"text": "Every flight I have is late and I am very angry. I want to hurt someone." \
+	}'
+
+go-detect-toxicity:
+	go run examples/toxicity/main.go
+
 # ==============================================================================
 # Modules support
 
