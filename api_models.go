@@ -6,6 +6,18 @@ import (
 	"time"
 )
 
+// Error represents an error in the system.
+type Error struct {
+	Message string `json:"error"`
+}
+
+// Error implements the error interface.
+func (err *Error) Error() string {
+	return err.Message
+}
+
+// =============================================================================
+
 // Time supports the ability to marshal and unmarshal unit epoch time.
 type Time struct {
 	time.Time

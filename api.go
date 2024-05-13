@@ -15,18 +15,6 @@ import (
 	"time"
 )
 
-// Error represents an error in the system.
-type Error struct {
-	Message string `json:"error"`
-}
-
-// Error implements the error interface.
-func (err *Error) Error() string {
-	return err.Message
-}
-
-// =============================================================================
-
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
