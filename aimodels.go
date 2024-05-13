@@ -2,15 +2,17 @@ package client
 
 import "fmt"
 
-// Models represents the set of models that can be used.
-var Models = struct {
+type modelSet struct {
 	MetaLlama38BInstruct     Model
 	NousHermesLlama213B      Model
 	Hermes2ProMistral7B      Model
 	NeuralChat7B             Model
 	Yi34BChat                Model
 	DeepseekCoder67BInstruct Model
-}{
+}
+
+// Models represents the set of models that can be used.
+var Models = modelSet{
 	MetaLlama38BInstruct:     newModel("Meta-Llama-38B-Instruct"),
 	NousHermesLlama213B:      newModel("Nous-Hermes-Llama-213B"),
 	Hermes2ProMistral7B:      newModel("Hermes-2-Pro-Mistral-7B"),
@@ -18,6 +20,29 @@ var Models = struct {
 	Yi34BChat:                newModel("Yi-34B-Chat"),
 	DeepseekCoder67BInstruct: newModel("deepseek-coder-6.7b-instruct"),
 }
+
+// Parse parses the string value and returns a model if one exists.
+func (modelSet) Parse(value string) (Model, error) {
+	model, exists := models[value]
+	if !exists {
+		return Model{}, fmt.Errorf("invalid Model %q", value)
+	}
+
+	return model, nil
+}
+
+// MustParseModel parses the string value and returns a model if one exists. If
+// an error occurs the function panics.
+func (modelSet) MustParse(value string) Model {
+	Model, err := Models.Parse(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return Model
+}
+
+// =============================================================================
 
 // Set of known models.
 var models = make(map[string]Model)
@@ -33,27 +58,6 @@ func newModel(model string) Model {
 	return r
 }
 
-// ParseModel parses the string value and returns a model if one exists.
-func ParseModel(value string) (Model, error) {
-	model, exists := models[value]
-	if !exists {
-		return Model{}, fmt.Errorf("invalid Model %q", value)
-	}
-
-	return model, nil
-}
-
-// MustParseModel parses the string value and returns a model if one exists. If
-// an error occurs the function panics.
-func MustParseModel(value string) Model {
-	Model, err := ParseModel(value)
-	if err != nil {
-		panic(err)
-	}
-
-	return Model
-}
-
 // Name returns the name of the Model.
 func (r Model) Name() string {
 	return r.name
@@ -61,7 +65,7 @@ func (r Model) Name() string {
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
 func (r *Model) UnmarshalText(data []byte) error {
-	Model, err := ParseModel(string(data))
+	Model, err := Models.Parse(string(data))
 	if err != nil {
 		return err
 	}

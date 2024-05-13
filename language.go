@@ -2,8 +2,7 @@ package client
 
 import "fmt"
 
-// Languages represents the set of languages that can be used.
-var Languages = struct {
+type languageSet struct {
 	Afrikanns  Language
 	Amharic    Language
 	Arabic     Language
@@ -75,7 +74,10 @@ var Languages = struct {
 	Urdu       Language
 	Welsh      Language
 	Vietnamese Language
-}{
+}
+
+// Languages represents the set of languages that can be used.
+var Languages = languageSet{
 	Afrikanns:  newLanguage("afr"),
 	Amharic:    newLanguage("amh"),
 	Arabic:     newLanguage("ara"),
@@ -149,6 +151,29 @@ var Languages = struct {
 	Vietnamese: newLanguage("vie"),
 }
 
+// Parse parses the string value and returns a language if one exists.
+func (languageSet) Parse(value string) (Language, error) {
+	lang, exists := languages[value]
+	if !exists {
+		return Language{}, fmt.Errorf("invalid language %q", value)
+	}
+
+	return lang, nil
+}
+
+// MustParse parses the string value and returns a language if one
+// exists. If an error occurs the function panics.
+func (languageSet) MustParse(value string) Language {
+	lang, err := Languages.Parse(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return lang
+}
+
+// =============================================================================
+
 // Set of known languages.
 var languages = make(map[string]Language)
 
@@ -163,27 +188,6 @@ func newLanguage(code string) Language {
 	return l
 }
 
-// ParseLanguage parses the string value and returns a language if one exists.
-func ParseLanguage(value string) (Language, error) {
-	lang, exists := languages[value]
-	if !exists {
-		return Language{}, fmt.Errorf("invalid language %q", value)
-	}
-
-	return lang, nil
-}
-
-// MustParseLanguage parses the string value and returns a language if one
-// exists. If an error occurs the function panics.
-func MustParseLanguage(value string) Language {
-	lang, err := ParseLanguage(value)
-	if err != nil {
-		panic(err)
-	}
-
-	return lang
-}
-
 // Code returns the ISO-639 code of the language.
 func (l Language) Code() string {
 	return l.code
@@ -191,7 +195,7 @@ func (l Language) Code() string {
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
 func (l *Language) UnmarshalText(data []byte) error {
-	lang, err := ParseLanguage(string(data))
+	lang, err := Languages.Parse(string(data))
 	if err != nil {
 		return err
 	}

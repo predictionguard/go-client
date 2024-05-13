@@ -72,7 +72,7 @@ func (cln *Client) ChatSSE(ctx context.Context, model string, input []ChatMessag
 // =============================================================================
 
 // Completions retrieve text completions based on the provided input.
-func (cln *Client) Completions(ctx context.Context, model string, text string, maxTokens int, temperature float32) (Completion, error) {
+func (cln *Client) Completions(ctx context.Context, model Model, text string, maxTokens int, temperature float32) (Completion, error) {
 	url := fmt.Sprintf("%s/completions", cln.host)
 
 	body := struct {
@@ -81,7 +81,7 @@ func (cln *Client) Completions(ctx context.Context, model string, text string, m
 		MaxTokens   int     `json:"max_tokens"`
 		Temperature float32 `json:"temperature"`
 	}{
-		Model:       model,
+		Model:       model.name,
 		Prompt:      text,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
