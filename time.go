@@ -2,6 +2,7 @@ package client
 
 import (
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -13,7 +14,9 @@ type Time struct {
 // UnmarshalJSON overrides the time.Time implementation so we can unmarshal
 // from epoch time.
 func (t *Time) UnmarshalJSON(data []byte) error {
-	num, err := strconv.Atoi(string(data))
+	d := strings.Trim(string(data), "\"")
+
+	num, err := strconv.Atoi(d)
 	if err != nil {
 		return err
 	}

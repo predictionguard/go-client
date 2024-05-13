@@ -7,8 +7,10 @@ var replaceMethods = make(map[string]ReplaceMethod)
 
 // Set of possible replace methods.
 var (
-	ReplaceMethodUser      = newReplaceMethod("user")
-	ReplaceMethodAssistant = newReplaceMethod("assistant")
+	ReplaceMethodRandom   = newReplaceMethod("random")
+	ReplaceMethodFake     = newReplaceMethod("fake")
+	ReplaceMethodCategory = newReplaceMethod("category")
+	ReplaceMethodMask     = newReplaceMethod("mask")
 )
 
 // ReplaceMethod represents a replace method in the system.

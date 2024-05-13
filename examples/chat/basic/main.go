@@ -42,7 +42,7 @@ func run() error {
 
 	resp, err := cln.Chat(ctx, "Neural-Chat-7B", input, 1000, 1.1)
 	if err != nil {
-		return fmt.Errorf("chat: %w", err)
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	log.Printf(resp.Choices[0].Message.Content)

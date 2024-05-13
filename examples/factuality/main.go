@@ -37,10 +37,10 @@ func run() error {
 	text := "The president of the united states can take a salary of one million dollars"
 	resp, err := cln.Factuality(ctx, fact, text)
 	if err != nil {
-		return fmt.Errorf("comp: %w", err)
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Printf("%#v", resp.Checks[0])
+	log.Println(resp.Checks[0])
 
 	return nil
 }

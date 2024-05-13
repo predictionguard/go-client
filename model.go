@@ -114,9 +114,9 @@ type Translate struct {
 
 // RPICheck represents the response for rpi.
 type RPICheck struct {
-	Prompt float64 `json:"new_prompt"`
-	Index  int     `json:"index"`
-	Status string  `json:"status"`
+	Text   string `json:"new_prompt"`
+	Index  int    `json:"index"`
+	Status string `json:"status"`
 }
 
 // ReplacePersonalInformation replaces personal information such as names,

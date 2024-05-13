@@ -37,7 +37,7 @@ func run() error {
 
 	resp, err := cln.Translate(ctx, text, client.LangEnglish, client.LangSpanish)
 	if err != nil {
-		return fmt.Errorf("translate: %w", err)
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	log.Print(resp.BestTranslation)

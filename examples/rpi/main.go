@@ -33,12 +33,14 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, "Neural-Chat-7B", "Will I lose my hair", 1000, 1.1)
+	text := "My email is bill@ardanlabs.com and my number is 954-123-4567."
+
+	resp, err := cln.ReplacePersonalInformation(ctx, text, client.ReplaceMethodMask)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Printf(resp.Choices[0].Text)
+	log.Print(resp.Checks[0].Text)
 
 	return nil
 }

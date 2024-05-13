@@ -72,7 +72,7 @@ func (cln *Client) ChatSSE(ctx context.Context, model string, input []ChatMessag
 // =============================================================================
 
 // Completions retrieve text completions based on the provided input.
-func (cln *Client) Completions(ctx context.Context, model string, prompt string, maxTokens int, temperature float32) (Completion, error) {
+func (cln *Client) Completions(ctx context.Context, model string, text string, maxTokens int, temperature float32) (Completion, error) {
 	url := fmt.Sprintf("%s/completions", cln.host)
 
 	body := struct {
@@ -82,7 +82,7 @@ func (cln *Client) Completions(ctx context.Context, model string, prompt string,
 		Temperature float32 `json:"temperature"`
 	}{
 		Model:       model,
-		Prompt:      prompt,
+		Prompt:      text,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 	}
@@ -145,16 +145,16 @@ func (cln *Client) Translate(ctx context.Context, text string, source Language, 
 
 // ReplacePersonalInformation replaces personal information such as names, SSNs,
 // and emails in a given text.
-func (cln *Client) ReplacePersonalInformation(ctx context.Context, prompt string, replace bool, method ReplaceMethod) (ReplacePersonalInformation, error) {
-	url := fmt.Sprintf("%s/translate", cln.host)
+func (cln *Client) ReplacePersonalInformation(ctx context.Context, text string, method ReplaceMethod) (ReplacePersonalInformation, error) {
+	url := fmt.Sprintf("%s/PII", cln.host)
 
 	body := struct {
 		Prompt  string        `json:"prompt"`
 		Replace bool          `json:"replace"`
 		Method  ReplaceMethod `json:"replace_method"`
 	}{
-		Prompt:  prompt,
-		Replace: replace,
+		Prompt:  text,
+		Replace: true,
 		Method:  method,
 	}
 

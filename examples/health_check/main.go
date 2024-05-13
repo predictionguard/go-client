@@ -38,7 +38,7 @@ func run() error {
 		return fmt.Errorf("healthcheck: %w", err)
 	}
 
-	log.Println("res:", resp)
+	log.Println(resp)
 
 	return nil
 }

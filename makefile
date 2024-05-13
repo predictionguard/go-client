@@ -87,6 +87,19 @@ curl-translate:
 go-translate:
 	go run examples/translate/main.go
 
+curl-rpi:
+	curl -X POST https://api.predictionguard.com/PII \
+     -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"prompt": "My email is bill@ardanlabs.com and my number is 954-123-4567.", \
+		"replace": true, \
+		"replace_method": "mask" \
+	}'
+
+go-rpi:
+	go run examples/rpi/main.go
+
 # ==============================================================================
 # Modules support
 

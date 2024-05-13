@@ -44,7 +44,7 @@ func run() error {
 
 	err := cln.ChatSSE(ctx, "Neural-Chat-7B", input, 1000, 1.1, ch)
 	if err != nil {
-		return fmt.Errorf("chat: %w", err)
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	for resp := range ch {
