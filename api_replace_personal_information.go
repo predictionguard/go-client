@@ -21,7 +21,7 @@ type ReplacePersonalInformation struct {
 
 // ReplacePersonalInformation replaces personal information such as names, SSNs,
 // and emails in a given text.
-func (cln *Client) ReplacePersonalInformation(ctx context.Context, text string, method ReplaceMethod) (ReplacePersonalInformation, error) {
+func (cln *Client) ReplacePersonalInformation(ctx context.Context, prompt string, method ReplaceMethod) (ReplacePersonalInformation, error) {
 	url := fmt.Sprintf("%s/PII", cln.host)
 
 	body := struct {
@@ -29,7 +29,7 @@ func (cln *Client) ReplacePersonalInformation(ctx context.Context, text string, 
 		Replace bool          `json:"replace"`
 		Method  ReplaceMethod `json:"replace_method"`
 	}{
-		Prompt:  text,
+		Prompt:  prompt,
 		Replace: true,
 		Method:  method,
 	}

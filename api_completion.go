@@ -20,7 +20,7 @@ type Completion struct {
 }
 
 // Completions retrieve text completions based on the provided input.
-func (cln *Client) Completions(ctx context.Context, model Model, text string, maxTokens int, temperature float32) (Completion, error) {
+func (cln *Client) Completions(ctx context.Context, model Model, prompt string, maxTokens int, temperature float32) (Completion, error) {
 	url := fmt.Sprintf("%s/completions", cln.host)
 
 	body := struct {
@@ -30,7 +30,7 @@ func (cln *Client) Completions(ctx context.Context, model Model, text string, ma
 		Temperature float32 `json:"temperature"`
 	}{
 		Model:       model.name,
-		Prompt:      text,
+		Prompt:      prompt,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 	}

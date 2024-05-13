@@ -19,14 +19,14 @@ type DetectInjection struct {
 }
 
 // DetectInjection detects potential prompt injection attacks in a given prompt.
-func (cln *Client) DetectInjection(ctx context.Context, text string) (DetectInjection, error) {
+func (cln *Client) DetectInjection(ctx context.Context, prompt string) (DetectInjection, error) {
 	url := fmt.Sprintf("%s/injection", cln.host)
 
 	body := struct {
 		Prompt string `json:"prompt"`
 		Detect bool   `json:"detect"`
 	}{
-		Prompt: text,
+		Prompt: prompt,
 		Detect: true,
 	}
 
