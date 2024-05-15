@@ -35,12 +35,13 @@ func run() error {
 
 	fact := "The President shall receive in full for his services during the term for which he shall have been elected compensation in the aggregate amount of 400,000 a year, to be paid monthly, and in addition an expense allowance of 50,000 to assist in defraying expenses relating to or resulting from the discharge of his official duties. Any unused amount of such expense allowance shall revert to the Treasury pursuant to section 1552 of title 31, United States Code. No amount of such expense allowance shall be included in the gross income of the President. He shall be entitled also to the use of the furniture and other effects belonging to the United States and kept in the Executive Residence at the White House."
 	text := "The president of the united states can take a salary of one million dollars"
+
 	resp, err := cln.Factuality(ctx, fact, text)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Println(resp.Checks[0])
+	fmt.Println(resp.Checks[0])
 
 	return nil
 }

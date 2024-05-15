@@ -38,7 +38,7 @@ func run() error {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Printf(resp.Choices[0].Text)
+	fmt.Println(resp.Choices[0].Text)
 
 	return nil
 }
