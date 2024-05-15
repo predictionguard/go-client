@@ -3,6 +3,7 @@ package client_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -17,16 +18,16 @@ func Test_Client(t *testing.T) {
 	service := newService(t)
 	defer service.Teardown()
 
-	runTests(t, chatTests(service.Client), "chat")
-	runTests(t, completionTests(service.Client), "completion")
-	runTests(t, factualityTests(service.Client), "factuality")
-	runTests(t, injectionTests(service.Client), "injection")
-	runTests(t, replacepiTests(service.Client), "replacepi")
-	runTests(t, toxicityTests(service.Client), "toxicity")
-	runTests(t, translateTests(service.Client), "translate")
+	runTests(t, chatTests(service), "chat")
+	runTests(t, completionTests(service), "completion")
+	runTests(t, factualityTests(service), "factuality")
+	runTests(t, injectionTests(service), "injection")
+	runTests(t, replacepiTests(service), "replacepi")
+	runTests(t, toxicityTests(service), "toxicity")
+	runTests(t, translateTests(service), "translate")
 }
 
-func chatTests(cln *client.Client) []table {
+func chatTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -62,7 +63,7 @@ func chatTests(cln *client.Client) []table {
 					},
 				}
 
-				resp, err := cln.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 1.1)
+				resp, err := srv.Client.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 1.1)
 				if err != nil {
 					return err
 				}
@@ -73,12 +74,40 @@ func chatTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Chat(ctx, client.Models.NeuralChat7B, []client.ChatMessage{}, 1000, 1.1)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func completionTests(cln *client.Client) []table {
+func completionTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -104,7 +133,7 @@ func completionTests(cln *client.Client) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 1.1)
+				resp, err := srv.Client.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 1.1)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -115,12 +144,40 @@ func completionTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Completions(ctx, client.Models.NeuralChat7B, "", 1000, 1.1)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func factualityTests(cln *client.Client) []table {
+func factualityTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -147,7 +204,7 @@ func factualityTests(cln *client.Client) []table {
 				reference := "The President shall receive in full for his services during the term for which he shall have been elected compensation in the aggregate amount of 400,000 a year, to be paid monthly, and in addition an expense allowance of 50,000 to assist in defraying expenses relating to or resulting from the discharge of his official duties. Any unused amount of such expense allowance shall revert to the Treasury pursuant to section 1552 of title 31, United States Code. No amount of such expense allowance shall be included in the gross income of the President. He shall be entitled also to the use of the furniture and other effects belonging to the United States and kept in the Executive Residence at the White House."
 				text := "The president of the united states can take a salary of one million dollars"
 
-				resp, err := cln.Factuality(ctx, reference, text)
+				resp, err := srv.Client.Factuality(ctx, reference, text)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -158,12 +215,40 @@ func factualityTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Factuality(ctx, "", "")
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func injectionTests(cln *client.Client) []table {
+func injectionTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -189,7 +274,7 @@ func injectionTests(cln *client.Client) []table {
 
 				prompt := "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way."
 
-				resp, err := cln.Injection(ctx, prompt)
+				resp, err := srv.Client.Injection(ctx, prompt)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -200,12 +285,40 @@ func injectionTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Injection(ctx, "")
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func replacepiTests(cln *client.Client) []table {
+func replacepiTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -231,7 +344,7 @@ func replacepiTests(cln *client.Client) []table {
 
 				prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-				resp, err := cln.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
+				resp, err := srv.Client.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -242,12 +355,40 @@ func replacepiTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.ReplacePI(ctx, "", client.ReplaceMethods.Mask)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func toxicityTests(cln *client.Client) []table {
+func toxicityTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -273,7 +414,7 @@ func toxicityTests(cln *client.Client) []table {
 
 				text := "Every flight I have is late and I am very angry. I want to hurt someone."
 
-				resp, err := cln.Toxicity(ctx, text)
+				resp, err := srv.Client.Toxicity(ctx, text)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -284,12 +425,40 @@ func toxicityTests(cln *client.Client) []table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Toxicity(ctx, "")
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
 	}
 
 	return table
 }
 
-func translateTests(cln *client.Client) []table {
+func translateTests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -340,7 +509,7 @@ func translateTests(cln *client.Client) []table {
 				source := client.Languages.English
 				target := client.Languages.Spanish
 
-				resp, err := cln.Translate(ctx, text, source, target)
+				resp, err := srv.Client.Translate(ctx, text, source, target)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -349,6 +518,37 @@ func translateTests(cln *client.Client) []table {
 			},
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				source := client.Languages.English
+				target := client.Languages.Spanish
+
+				resp, err := srv.BadClient.Translate(ctx, "", source, target)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
 			},
 		},
 	}
@@ -393,9 +593,10 @@ func runTests(t *testing.T, table []table, testName string) {
 // =============================================================================
 
 type service struct {
-	Client   *client.Client
-	Teardown func()
-	server   *httptest.Server
+	Client    *client.Client
+	BadClient *client.Client
+	Teardown  func()
+	server    *httptest.Server
 }
 
 func newService(t *testing.T) *service {
@@ -411,10 +612,12 @@ func newService(t *testing.T) *service {
 	mux := http.NewServeMux()
 	srv := httptest.NewServer(mux)
 
-	client := client.New(logger, srv.URL, "")
+	cln := client.New(logger, srv.URL, "some-key")
+	badCln := client.New(logger, srv.URL, "")
 
 	s := service{
-		Client: client,
+		Client:    cln,
+		BadClient: badCln,
 		Teardown: func() {
 			t.Log("******************** LOGS ********************")
 			t.Log(buf.String())
@@ -437,6 +640,11 @@ func newService(t *testing.T) *service {
 }
 
 func (s *service) chat(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat_completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -445,6 +653,11 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) completion(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text_completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"Neural-Chat-7B"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -453,6 +666,11 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) injection(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"checks":[{"probability":0.5,"index":0,"status":"success"}],"created":"1715729859","id":"injection-Nb817UlEMTog2YOe1JHYbq2oUyZAW7Lk","object":"injection_check"}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -461,6 +679,11 @@ func (s *service) injection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"checks":[{"score":0.7879658937454224,"index":0,"status":"success"}],"created":1715730425,"id":"fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R","object":"factuality_check"}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -469,6 +692,11 @@ func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) replacePI(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"checks":[{"new_prompt":"My email is * and my number is *.","index":0,"status":"success"}],"created":"1715730803","id":"pii-ax9rE9ld3W5yxN1Sz7OKxXkMTMo736jJ","object":"pii_check"}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -477,6 +705,11 @@ func (s *service) replacePI(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) toxicity(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"checks":[{"score":0.7072361707687378,"index":0,"status":"success"}],"created":1715731131,"id":"toxi-vRvkxJHmAiSh3NvuuSc48HQ669g7y","object":"toxicity_check"}`
 
 	w.Header().Set("Content-Type", "application/json")
@@ -485,6 +718,11 @@ func (s *service) toxicity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) translate(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	resp := `{"translations":[{"score":-100,"translation":"","model":"openai","status":"error: couldn't get translation"},{"score":0.5008206963539124,"translation":"La lluvia en España se queda principalmente en la llanura","model":"deepl","status":"success"},{"score":0.5381188988685608,"translation":"La lluvia en España permanece principalmente en la llanura","model":"google","status":"success"},{"score":0.48437628149986267,"translation":"La lluvia en España se queda principalmente en la llanura.","model":"nous_hermes_llama2","status":"success"}],"best_translation":"La lluvia en España permanece principalmente en la llanura","best_score":0.5381188988685608,"best_translation_model":"google","created":1715731416,"id":"translation-0210cae4da704099b58471876ffa3d2e","object":"translation"}`
 
 	w.Header().Set("Content-Type", "application/json")
