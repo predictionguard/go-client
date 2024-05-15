@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// DetectInjection represents the result for the detect injection call.
-type DetectInjection struct {
+// Injection represents the result for the detect injection call.
+type Injection struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Created Time   `json:"created"`
@@ -18,8 +18,8 @@ type DetectInjection struct {
 	} `json:"checks"`
 }
 
-// DetectInjection detects potential prompt injection attacks in a given prompt.
-func (cln *Client) DetectInjection(ctx context.Context, prompt string) (DetectInjection, error) {
+// Injection detects potential prompt injection attacks in a given prompt.
+func (cln *Client) Injection(ctx context.Context, prompt string) (Injection, error) {
 	url := fmt.Sprintf("%s/injection", cln.host)
 
 	body := struct {
@@ -30,9 +30,9 @@ func (cln *Client) DetectInjection(ctx context.Context, prompt string) (DetectIn
 		Detect: true,
 	}
 
-	var resp DetectInjection
+	var resp Injection
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
-		return DetectInjection{}, err
+		return Injection{}, err
 	}
 
 	return resp, nil

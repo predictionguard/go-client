@@ -13,7 +13,7 @@ type Translate struct {
 	Created              Time    `json:"created"`
 	BestTranslation      string  `json:"best_translation"`
 	BestTranslationModel string  `json:"best_translation_model"`
-	Score                float64 `json:"score"`
+	Score                float64 `json:"best_score"`
 	Translations         []struct {
 		Score       float64 `json:"score"`
 		Translation string  `json:"translation"`

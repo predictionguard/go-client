@@ -6,9 +6,8 @@ import (
 	"net/http"
 )
 
-// ReplacePersonalInformation replaces personal information such as names,
-// SSNs, and emails in a given text.
-type ReplacePersonalInformation struct {
+// ReplacePI represents the result for the pii call.
+type ReplacePI struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Created Time   `json:"created"`
@@ -19,9 +18,9 @@ type ReplacePersonalInformation struct {
 	} `json:"checks"`
 }
 
-// ReplacePersonalInformation replaces personal information such as names, SSNs,
-// and emails in a given text.
-func (cln *Client) ReplacePersonalInformation(ctx context.Context, prompt string, method ReplaceMethod) (ReplacePersonalInformation, error) {
+// ReplacePI replaces personal information such as names, SSNs, and emails in a
+// given text.
+func (cln *Client) ReplacePI(ctx context.Context, prompt string, method ReplaceMethod) (ReplacePI, error) {
 	url := fmt.Sprintf("%s/PII", cln.host)
 
 	body := struct {
@@ -34,9 +33,9 @@ func (cln *Client) ReplacePersonalInformation(ctx context.Context, prompt string
 		Method:  method,
 	}
 
-	var resp ReplacePersonalInformation
+	var resp ReplacePI
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
-		return ReplacePersonalInformation{}, err
+		return ReplacePI{}, err
 	}
 
 	return resp, nil

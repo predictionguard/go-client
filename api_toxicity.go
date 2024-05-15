@@ -18,7 +18,7 @@ type Toxicity struct {
 	} `json:"checks"`
 }
 
-// Completions retrieve text completions based on the provided input.
+// Toxicity checks the toxicity of a given text.
 func (cln *Client) Toxicity(ctx context.Context, text string) (Toxicity, error) {
 	url := fmt.Sprintf("%s/toxicity", cln.host)
 

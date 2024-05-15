@@ -33,14 +33,14 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	text := "My email is bill@ardanlabs.com and my number is 954-123-4567."
+	prompt := "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way."
 
-	resp, err := cln.ReplacePersonalInformation(ctx, text, client.ReplaceMethods.Mask)
+	resp, err := cln.Injection(ctx, prompt)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Print(resp.Checks[0].Text)
+	log.Print(resp.Checks[0].Probability)
 
 	return nil
 }

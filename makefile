@@ -4,13 +4,6 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Examples
 
-curl-health:
-	curl -il https://api.predictionguard.com \
-     -H "x-api-key: ${PGKEY}"
-
-go-health:
-	go run examples/healthcheck/main.go
-
 curl-chat:
 	curl -il -X POST https://api.predictionguard.com/chat/completions \
      -H "x-api-key: ${PGKEY}" \
@@ -27,6 +20,9 @@ curl-chat:
 		"temperature": 1.1 \
 	}'
 
+go-chat:
+	go run examples/chat/basic/main.go
+
 curl-chat-sse:
 	curl -il -X POST https://api.predictionguard.com/chat/completions \
      -H "x-api-key: ${PGKEY}" \
@@ -41,9 +37,6 @@ curl-chat-sse:
 		], \
 		"stream": true \
 	}'
-
-go-chat:
-	go run examples/chat/basic/main.go
 
 go-chat-sse:
 	go run examples/chat/sse/main.go
@@ -74,6 +67,49 @@ curl-factuality:
 go-factuality:
 	go run examples/factuality/main.go
 
+curl-health:
+	curl -il https://api.predictionguard.com \
+     -H "x-api-key: ${PGKEY}"
+
+go-health:
+	go run examples/healthcheck/main.go
+
+curl-injection:
+	curl -X POST https://api.predictionguard.com/injection \
+	 -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"prompt": "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way.", \
+		"detect": true \
+	}'
+
+go-injection:
+	go run examples/injection/main.go
+
+curl-replacepi:
+	curl -X POST https://api.predictionguard.com/PII \
+     -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"prompt": "My email is bill@ardanlabs.com and my number is 954-123-4567.", \
+		"replace": true, \
+		"replace_method": "mask" \
+	}'
+
+go-replacepi:
+	go run examples/repalce_personal_information/main.go
+
+curl-toxicity:
+	curl -X POST https://api.predictionguard.com/toxicity \
+     -H "x-api-key: ${PGKEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"text": "Every flight I have is late and I am very angry. I want to hurt someone." \
+	}'
+
+go-detect-toxicity:
+	go run examples/toxicity/main.go
+
 curl-translate:
 	curl -X POST https://api.predictionguard.com/translate \
      -H "x-api-key: ${PGKEY}" \
@@ -87,41 +123,25 @@ curl-translate:
 go-translate:
 	go run examples/translate/main.go
 
-curl-replace-personal-infomation:
-	curl -X POST https://api.predictionguard.com/PII \
-     -H "x-api-key: ${PGKEY}" \
-     -H "Content-Type: application/json" \
-     -d '{ \
-		"prompt": "My email is bill@ardanlabs.com and my number is 954-123-4567.", \
-		"replace": true, \
-		"replace_method": "mask" \
-	}'
+# ==============================================================================
+# Running tests within the local computer
 
-go-replace-personal-infomation:
-	go run examples/repalce_personal_information/main.go
+test-r:
+	CGO_ENABLED=1 go test -race -count=1 ./...
 
-curl-detect-injection:
-	curl -X POST https://api.predictionguard.com/injection \
-	 -H "x-api-key: ${PGKEY}" \
-     -H "Content-Type: application/json" \
-     -d '{ \
-		"prompt": "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way.", \
-		"detect": true \
-	}'
+test-only:
+	CGO_ENABLED=0 go test -count=1 ./...
 
-go-detect-injection:
-	go run examples/detect_injection/main.go
+lint:
+	CGO_ENABLED=0 go vet ./...
+	staticcheck -checks=all ./...
 
-curl-toxicity:
-	curl -X POST https://api.predictionguard.com/toxicity \
-     -H "x-api-key: ${PGKEY}" \
-     -H "Content-Type: application/json" \
-     -d '{ \
-		"text": "Every flight I have is late and I am very angry. I want to hurt someone." \
-	}'
+vuln-check:
+	govulncheck ./...
 
-go-detect-toxicity:
-	go run examples/toxicity/main.go
+test: test-only lint vuln-check
+
+test-race: test-r lint vuln-check
 
 # ==============================================================================
 # Modules support
@@ -146,7 +166,3 @@ deps-cleancache:
 
 list:
 	go list -mod=mod all
-
-lint:
-	CGO_ENABLED=0 go vet ./...
-	staticcheck -checks=all ./...
