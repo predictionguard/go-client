@@ -130,13 +130,14 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 		scanner := bufio.NewScanner(resp.Body)
 		for scanner.Scan() {
 			line := scanner.Text()
+
 			if line == "" || line == "data: [DONE]" {
 				continue
 			}
 
 			var v T
 			if err := json.Unmarshal([]byte(line[6:]), &v); err != nil {
-				cln.log(ctx, "go-sse: rawRequest:", "ERROR", err)
+				cln.log(ctx, "go-sse: rawRequest:", "Unmarshal", err)
 				break
 			}
 

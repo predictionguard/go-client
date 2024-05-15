@@ -6,16 +6,19 @@ import (
 	"net/http"
 )
 
-// Injection represents the result for the detect injection call.
+// InjectionCheck represents the result for the injection call.
+type InjectionCheck struct {
+	Probability float64 `json:"probability"`
+	Index       int     `json:"index"`
+	Status      string  `json:"status"`
+}
+
+// Injection represents the result for the injection call.
 type Injection struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Checks  []struct {
-		Probability float64 `json:"probability"`
-		Index       int     `json:"index"`
-		Status      string  `json:"status"`
-	} `json:"checks"`
+	ID      string           `json:"id"`
+	Object  string           `json:"object"`
+	Created Time             `json:"created"`
+	Checks  []InjectionCheck `json:"checks"`
 }
 
 // Injection detects potential prompt injection attacks in a given prompt.

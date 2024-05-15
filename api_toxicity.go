@@ -6,16 +6,19 @@ import (
 	"net/http"
 )
 
+// ToxicityCheck represents the result for the toxicity call.
+type ToxicityCheck struct {
+	Score  float64 `json:"score"`
+	Index  int     `json:"index"`
+	Status string  `json:"status"`
+}
+
 // Toxicity represents the result for the toxicity call.
 type Toxicity struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Checks  []struct {
-		Score  float64 `json:"score"`
-		Index  int     `json:"index"`
-		Status string  `json:"status"`
-	} `json:"checks"`
+	ID      string          `json:"id"`
+	Object  string          `json:"object"`
+	Created Time            `json:"created"`
+	Checks  []ToxicityCheck `json:"checks"`
 }
 
 // Toxicity checks the toxicity of a given text.

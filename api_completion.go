@@ -6,17 +6,20 @@ import (
 	"net/http"
 )
 
+// CompletionChoice represents a choice for the completion call.
+type CompletionChoice struct {
+	Text   string `json:"text"`
+	Index  int    `json:"index"`
+	Status string `json:"status"`
+	Model  string `json:"model"`
+}
+
 // Completion represents the result for the completion call.
 type Completion struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Choices []struct {
-		Text   string `json:"text"`
-		Index  int    `json:"index"`
-		Status string `json:"status"`
-		Model  string `json:"model"`
-	} `json:"choices"`
+	ID      string             `json:"id"`
+	Object  string             `json:"object"`
+	Created Time               `json:"created"`
+	Choices []CompletionChoice `json:"choices"`
 }
 
 // Completions retrieve text completions based on the provided input.

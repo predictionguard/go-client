@@ -6,16 +6,19 @@ import (
 	"net/http"
 )
 
+// ReplacePICheck represents the result for the pii call.
+type ReplacePICheck struct {
+	Text   string `json:"new_prompt"`
+	Index  int    `json:"index"`
+	Status string `json:"status"`
+}
+
 // ReplacePI represents the result for the pii call.
 type ReplacePI struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Checks  []struct {
-		Text   string `json:"new_prompt"`
-		Index  int    `json:"index"`
-		Status string `json:"status"`
-	} `json:"checks"`
+	ID      string           `json:"id"`
+	Object  string           `json:"object"`
+	Created Time             `json:"created"`
+	Checks  []ReplacePICheck `json:"checks"`
 }
 
 // ReplacePI replaces personal information such as names, SSNs, and emails in a

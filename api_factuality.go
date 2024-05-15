@@ -6,16 +6,19 @@ import (
 	"net/http"
 )
 
+// FactualityCheck represents the result for the factuality call.
+type FactualityCheck struct {
+	Score  float64 `json:"score"`
+	Index  int     `json:"index"`
+	Status string  `json:"status"`
+}
+
 // Factuality represents the result for the factuality call.
 type Factuality struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Checks  []struct {
-		Score  float64 `json:"score"`
-		Index  int     `json:"index"`
-		Status string  `json:"status"`
-	} `json:"checks"`
+	ID      string            `json:"id"`
+	Object  string            `json:"object"`
+	Created Time              `json:"created"`
+	Checks  []FactualityCheck `json:"checks"`
 }
 
 // Factuality checks the factuality of a given text compared to a reference.

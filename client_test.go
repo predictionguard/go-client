@@ -3,8 +3,10 @@ package client_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -75,6 +77,89 @@ func chatTests(srv *service) []table {
 			},
 		},
 		{
+			Name: "sse",
+			ExpResp: []client.ChatSSE{
+				{
+					ID:      "chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe",
+					Object:  "chat.completion.chunk",
+					Created: client.ToTime(1715734993),
+					Model:   client.Models.NeuralChat7B,
+					Choices: []client.ChatSSEChoice{
+						{
+							Index: 0,
+							Delta: client.ChatSSEDelta{
+								Content: " I",
+							},
+							Text:         "",
+							Probs:        0,
+							FinishReason: "",
+						},
+					},
+				},
+				{
+					ID:      "chat-afH2BnyvKPvon2r16DkUWJygbvePY",
+					Object:  "chat.completion.chunk",
+					Created: client.ToTime(1715734993),
+					Model:   client.Models.NeuralChat7B,
+					Choices: []client.ChatSSEChoice{
+						{
+							Index: 0,
+							Delta: client.ChatSSEDelta{
+								Content: " believe",
+							},
+							Text:         "",
+							Probs:        -0.8534317,
+							FinishReason: "",
+						},
+					},
+				},
+				{
+					ID:      "chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb",
+					Object:  "chat.completion.chunk",
+					Created: client.ToTime(1715734995),
+					Model:   client.Models.NeuralChat7B,
+					Choices: []client.ChatSSEChoice{
+						{
+							Index: 0,
+							Delta: client.ChatSSEDelta{
+								Content: "",
+							},
+							Text:         "I believe",
+							Probs:        0,
+							FinishReason: "stop",
+						},
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := []client.ChatMessage{
+					{
+						Role:    client.Roles.User,
+						Content: "How do you feel about the world in general",
+					},
+				}
+
+				ch := make(chan client.ChatSSE)
+
+				if err := srv.Client.ChatSSE(ctx, client.Models.NeuralChat7B, input, 1000, 1.1, ch); err != nil {
+					return err
+				}
+
+				var sse []client.ChatSSE
+				for v := range ch {
+					sse = append(sse, v)
+				}
+
+				return sse
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
 			Name:    "badkey",
 			ExpResp: client.ErrUnauthorized,
 			ExcFunc: func(ctx context.Context) any {
@@ -115,12 +200,7 @@ func completionTests(srv *service) []table {
 				ID:      "cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4",
 				Object:  "text_completion",
 				Created: client.ToTime(1715632193),
-				Choices: []struct {
-					Text   string `json:"text"`
-					Index  int    `json:"index"`
-					Status string `json:"status"`
-					Model  string `json:"model"`
-				}{
+				Choices: []client.CompletionChoice{
 					{
 						Text:   "after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.",
 						Index:  0,
@@ -185,11 +265,7 @@ func factualityTests(srv *service) []table {
 				ID:      "fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R",
 				Object:  "factuality_check",
 				Created: client.ToTime(1715730425),
-				Checks: []struct {
-					Score  float64 `json:"score"`
-					Index  int     `json:"index"`
-					Status string  `json:"status"`
-				}{
+				Checks: []client.FactualityCheck{
 					{
 						Score:  0.7879658937454224,
 						Index:  0,
@@ -256,11 +332,7 @@ func injectionTests(srv *service) []table {
 				ID:      "injection-Nb817UlEMTog2YOe1JHYbq2oUyZAW7Lk",
 				Object:  "injection_check",
 				Created: client.ToTime(1715729859),
-				Checks: []struct {
-					Probability float64 `json:"probability"`
-					Index       int     `json:"index"`
-					Status      string  `json:"status"`
-				}{
+				Checks: []client.InjectionCheck{
 					{
 						Probability: 0.5,
 						Index:       0,
@@ -326,11 +398,7 @@ func replacepiTests(srv *service) []table {
 				ID:      "pii-ax9rE9ld3W5yxN1Sz7OKxXkMTMo736jJ",
 				Object:  "pii_check",
 				Created: client.ToTime(1715730803),
-				Checks: []struct {
-					Text   string `json:"new_prompt"`
-					Index  int    `json:"index"`
-					Status string `json:"status"`
-				}{
+				Checks: []client.ReplacePICheck{
 					{
 						Text:   "My email is * and my number is *.",
 						Index:  0,
@@ -396,11 +464,7 @@ func toxicityTests(srv *service) []table {
 				ID:      "toxi-vRvkxJHmAiSh3NvuuSc48HQ669g7y",
 				Object:  "toxicity_check",
 				Created: client.ToTime(1715731131),
-				Checks: []struct {
-					Score  float64 `json:"score"`
-					Index  int     `json:"index"`
-					Status string  `json:"status"`
-				}{
+				Checks: []client.ToxicityCheck{
 					{
 						Score:  0.7072361707687378,
 						Index:  0,
@@ -469,12 +533,7 @@ func translateTests(srv *service) []table {
 				BestTranslation:      "La lluvia en España permanece principalmente en la llanura",
 				BestTranslationModel: "google",
 				Score:                0.5381188988685608,
-				Translations: []struct {
-					Score       float64 `json:"score"`
-					Translation string  `json:"translation"`
-					Model       string  `json:"model"`
-					Status      string  `json:"status"`
-				}{
+				Translations: []client.Translation{
 					{
 						Score:       -100,
 						Translation: "",
@@ -645,11 +704,51 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var body struct {
+		Stream bool `json:"stream"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Decoding Failed", http.StatusInternalServerError)
+		return
+	}
+
+	if body.Stream {
+		s.chatSSE(w)
+		return
+	}
+
 	resp := `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat_completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))
+}
+
+func (s *service) chatSSE(w http.ResponseWriter) {
+	events := []string{
+		`data: {"id":"chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe","object":"chat.completion.chunk","created":1715734993,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{"content":" I"},"generated_text":null,"logprobs":0,"finish_reason":null}]}`,
+		`data: {"id":"chat-afH2BnyvKPvon2r16DkUWJygbvePY","object":"chat.completion.chunk","created":1715734993,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{"content":" believe"},"generated_text":null,"logprobs":-0.8534317,"finish_reason":null}]}`,
+		`data: {"id":"chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb","object":"chat.completion.chunk","created":1715734995,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{},"generated_text":"I believe","logprobs":0,"finish_reason":"stop"}]}`,
+		`data: [DONE]`,
+	}
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "SSE not supported", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.WriteHeader(http.StatusOK)
+
+	for _, event := range events {
+		if _, err := fmt.Fprintln(w, event); err != nil {
+			log.Println(err)
+			break
+		}
+		flusher.Flush()
+	}
 }
 
 func (s *service) completion(w http.ResponseWriter, r *http.Request) {

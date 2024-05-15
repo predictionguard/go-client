@@ -42,7 +42,7 @@ func run() error {
 
 	ch := make(chan client.ChatSSE, 100)
 
-	err := cln.ChatSSE(ctx, "Neural-Chat-7B", input, 1000, 1.1, ch)
+	err := cln.ChatSSE(ctx, client.Models.NeuralChat7B, input, 1000, 1.1, ch)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
