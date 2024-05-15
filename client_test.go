@@ -39,11 +39,7 @@ func chatTests(srv *service) []table {
 				Object:  "chat_completion",
 				Created: client.ToTime(1715628729),
 				Model:   client.Models.NeuralChat7B,
-				Choices: []struct {
-					Index   int                `json:"index"`
-					Message client.ChatMessage `json:"message"`
-					Status  string             `json:"status"`
-				}{
+				Choices: []client.ChatChoice{
 					{
 						Index: 0,
 						Message: client.ChatMessage{

@@ -13,17 +13,20 @@ type ChatMessage struct {
 	Output  string `json:"output"`
 }
 
-// Chat represents the result for the chat completion call.
+// ChatChoice represents a choice for the chat call.
+type ChatChoice struct {
+	Index   int         `json:"index"`
+	Message ChatMessage `json:"message"`
+	Status  string      `json:"status"`
+}
+
+// Chat represents the result for the chat call.
 type Chat struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created Time   `json:"created"`
-	Model   Model  `json:"model"`
-	Choices []struct {
-		Index   int         `json:"index"`
-		Message ChatMessage `json:"message"`
-		Status  string      `json:"status"`
-	} `json:"choices"`
+	ID      string       `json:"id"`
+	Object  string       `json:"object"`
+	Created Time         `json:"created"`
+	Model   Model        `json:"model"`
+	Choices []ChatChoice `json:"choices"`
 }
 
 // Chat generate chat completions based on a conversation history.
