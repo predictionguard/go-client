@@ -1,5 +1,8 @@
 # Prediction Guard Go Client
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/predictionguard/go-client)](https://goreportcard.com/report/github.com/predictionguard/go-client)
+[![go.mod Go version](https://img.shields.io/github/go-mod/go-version/predictionguard/go-client)](https://github.com/predictionguard/go-client)
+
 Copyright 2024 Prediction Guard
 bill@predictionguard.com
 
