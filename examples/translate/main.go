@@ -40,7 +40,7 @@ func run() error {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Print(resp.BestTranslation)
+	fmt.Println(resp.BestTranslation)
 
 	return nil
 }

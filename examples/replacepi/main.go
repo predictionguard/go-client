@@ -40,7 +40,7 @@ func run() error {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	log.Print(resp.Checks[0].Text)
+	fmt.Println(resp.Checks[0].Text)
 
 	return nil
 }
