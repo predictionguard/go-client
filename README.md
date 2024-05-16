@@ -1,7 +1,10 @@
 # Prediction Guard Go Client
 
+[![CircleCI](https://circleci.com/gh/predictionguard/pg-go-client.svg?style=svg)](https://circleci.com/gh/predictionguard/pg-go-client)
 [![Go Report Card](https://goreportcard.com/badge/github.com/predictionguard/go-client)](https://goreportcard.com/report/github.com/predictionguard/go-client)
 [![go.mod Go version](https://img.shields.io/github/go-mod/go-version/predictionguard/go-client)](https://github.com/predictionguard/go-client)
+
+[![InsightsSnapshot](https://dl.circleci.com/insights-snapshot/gh/predictionguard/pg-go-client/main/workflow/badge.svg)](https://app.circleci.com/insights/github/predictionguard/pg-go-client/workflows/workflow/overview?branch=main)
 
 Copyright 2024 Prediction Guard
 bill@predictionguard.com
