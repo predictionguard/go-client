@@ -8,9 +8,9 @@ import (
 
 // ReplacePICheck represents the result for the pii call.
 type ReplacePICheck struct {
-	Text   string `json:"new_prompt"`
-	Index  int    `json:"index"`
-	Status string `json:"status"`
+	NewPrompt string `json:"new_prompt"`
+	Index     int    `json:"index"`
+	Status    string `json:"status"`
 }
 
 // ReplacePI represents the result for the pii call.
