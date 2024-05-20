@@ -397,9 +397,9 @@ func replacepiTests(srv *service) []table {
 				Created: client.ToTime(1715730803),
 				Checks: []client.ReplacePICheck{
 					{
-						Text:   "My email is * and my number is *.",
-						Index:  0,
-						Status: "success",
+						NewPrompt: "My email is * and my number is *.",
+						Index:     0,
+						Status:    "success",
 					},
 				},
 			},
@@ -1014,7 +1014,7 @@ func ExampleReplacePI() {
 		log.Fatalln("ERROR:", err)
 	}
 
-	fmt.Println(resp.Checks[0].Text)
+	fmt.Println(resp.Checks[0].NewPrompt)
 }
 
 func ExampleToxicity() {
