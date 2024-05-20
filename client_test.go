@@ -1007,9 +1007,9 @@ func ExampleReplacePI() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	text := "My email is bill@ardanlabs.com and my number is 954-123-4567."
+	prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-	resp, err := cln.ReplacePI(ctx, text, client.ReplaceMethods.Mask)
+	resp, err := cln.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}
