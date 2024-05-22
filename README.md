@@ -7,11 +7,81 @@
 Copyright 2024 Prediction Guard
 bill@predictionguard.com
 
-## Description
+### Description
 
-This Module provides an idiomatic api to access the prediction guard API.
+This Module provides functionality developed to simplify interfacing with [Prediction Guard API](https://www.predictionguard.com/) in Go.
 
-## Licensing
+### Requirements
+
+To access the API, contact us [here](https://www.predictionguard.com/getting-started) to get an enterprise access token. You will need this access token to continue.
+
+### Usage
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/predictionguard/go-client"
+)
+
+func main() {
+	if err := run(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func run() error {
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PGKEY")
+
+	logger := func(ctx context.Context, msg string, v ...any) {
+		s := fmt.Sprintf("msg: %s", msg)
+		for i := 0; i < len(v); i = i + 2 {
+			s = s + fmt.Sprintf(", %s: %v", v[i], v[i+1])
+		}
+		log.Println(s)
+	}
+
+	cln := client.New(logger, host, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	prompt := "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way."
+
+	resp, err := cln.Injection(ctx, prompt)
+	if err != nil {
+		return fmt.Errorf("ERROR: %w", err)
+	}
+
+	fmt.Println(resp.Checks[0].Probability)
+
+	return nil
+}
+```
+Take a look at the `examples` directory for more examples.
+
+### Docs
+
+You can find the Prediction Guard API docs on the Prediction Guard website.
+
+[API Docs](https://docs.predictionguard.com/docs/getting-started/welcome)
+
+[API Reference](https://docs.predictionguard.com/api-reference/api-reference/check-api-health)
+
+[Go Docs](https://pkg.go.dev/github.com/predictionguard/go-client)
+
+### Getting started
+
+Once you have your api key you can use the `makefile` to run curl commands for the different api endpoints. For example, `make curl-injection` will connect to the injection endpoint and return the injection response. The `makefile` also allows you to run the different examples such as `make go-injection` to run the Go injection example.
+
+#### Licensing
 
 ```
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +96,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-## Docs
-
-You can find API docs on the Prediction Guard website.
-
-https://docs.predictionguard.com/api-reference/api-reference/check-api-health
-
-Please use Go Docs for documentation about this Module.
-
-https://pkg.go.dev/github.com/predictionguard/go-client
+Copyright 2024 Prediction Guard
