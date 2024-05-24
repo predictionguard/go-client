@@ -40,7 +40,7 @@ func run() error {
 		},
 	}
 
-	resp, err := cln.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 1.1)
+	resp, err := cln.Chat(ctx, client.Models.Hermes2ProLlama38B, input, 1000, 1.1)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

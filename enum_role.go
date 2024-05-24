@@ -3,14 +3,16 @@ package client
 import "fmt"
 
 type roleSet struct {
-	User      Role
 	Assistant Role
+	User      Role
+	System    Role
 }
 
 // Roles represents the set of roles that can be used.
 var Roles = roleSet{
-	User:      newRole("user"),
 	Assistant: newRole("assistant"),
+	User:      newRole("user"),
+	System:    newRole("system"),
 }
 
 // Parse parses the string value and returns a role if one exists.
