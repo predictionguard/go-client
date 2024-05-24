@@ -3,7 +3,7 @@ package client
 import "fmt"
 
 type modelSet struct {
-	MetaLlama38BInstruct     Model
+	Hermes2ProLlama38B       Model
 	NousHermesLlama213B      Model
 	Hermes2ProMistral7B      Model
 	NeuralChat7B             Model
@@ -13,7 +13,7 @@ type modelSet struct {
 
 // Models represents the set of models that can be used.
 var Models = modelSet{
-	MetaLlama38BInstruct:     newModel("Meta-Llama-38B-Instruct"),
+	Hermes2ProLlama38B:       newModel("Hermes-2-Pro-Llama-3-8B"),
 	NousHermesLlama213B:      newModel("Nous-Hermes-Llama-213B"),
 	Hermes2ProMistral7B:      newModel("Hermes-2-Pro-Mistral-7B"),
 	NeuralChat7B:             newModel("Neural-Chat-7B"),
