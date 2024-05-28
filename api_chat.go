@@ -30,7 +30,7 @@ type Chat struct {
 }
 
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, model Model, messages []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, model Model, input []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	body := struct {
@@ -40,7 +40,7 @@ func (cln *Client) Chat(ctx context.Context, model Model, messages []ChatMessage
 		Temperature float32       `json:"temperature"`
 	}{
 		Model:       model.name,
-		Messages:    messages,
+		Messages:    input,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 	}
