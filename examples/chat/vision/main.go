@@ -50,7 +50,9 @@ func run() error {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	fmt.Println(resp.Choices[0].Message.Content)
+	for i, choice := range resp.Choices {
+		fmt.Printf("choice %d: %s\n", i, choice.Message.Content)
+	}
 
 	return nil
 }
