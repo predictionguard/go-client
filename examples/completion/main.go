@@ -33,7 +33,7 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 1.1)
+	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

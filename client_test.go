@@ -62,7 +62,7 @@ func chatTests(srv *service) []table {
 					},
 				}
 
-				resp, err := srv.Client.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 1.1)
+				resp, err := srv.Client.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 0.1)
 				if err != nil {
 					return err
 				}
@@ -163,7 +163,7 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Chat(ctx, client.Models.NeuralChat7B, []client.ChatMessage{}, 1000, 1.1)
+				resp, err := srv.BadClient.Chat(ctx, client.Models.NeuralChat7B, []client.ChatMessage{}, 1000, 0.1)
 				if err != nil {
 					return err
 				}
@@ -210,7 +210,7 @@ func completionTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.Client.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 1.1)
+				resp, err := srv.Client.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -228,7 +228,7 @@ func completionTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Completions(ctx, client.Models.NeuralChat7B, "", 1000, 1.1)
+				resp, err := srv.BadClient.Completions(ctx, client.Models.NeuralChat7B, "", 1000, 0.1)
 				if err != nil {
 					return err
 				}
@@ -854,7 +854,7 @@ func ExampleChat() {
 		},
 	}
 
-	resp, err := cln.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 1.1)
+	resp, err := cln.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 0.1)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}
@@ -921,7 +921,7 @@ func ExampleCompletion() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 1.1)
+	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}

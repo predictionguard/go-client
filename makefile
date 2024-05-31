@@ -65,7 +65,7 @@ curl-chat-vision:
 	 	  	} \
 		], \
 		"max_tokens": 300, \
-		"temperature": 1.1 \
+		"temperature": 0.1 \
 	}'
 
 go-chat-vision:
