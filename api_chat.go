@@ -140,8 +140,8 @@ type ChatVision struct {
 	Choices []ChatVisionChoice `json:"choices"`
 }
 
-// ChatVision generate chat completions based on text or images.
-func (cln *Client) ChatVision(ctx context.Context, role Role, text string, image Base64Encoder, maxTokens int, temperature float32) (ChatVision, error) {
+// ChatVision generate chat completions based on a question and an image.
+func (cln *Client) ChatVision(ctx context.Context, role Role, question string, image Base64Encoder, maxTokens int, temperature float32) (ChatVision, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	base64, err := image.EncodeBase64(ctx)
@@ -175,7 +175,7 @@ func (cln *Client) ChatVision(ctx context.Context, role Role, text string, image
 				Content: []content{
 					{
 						Type: "text",
-						Text: text,
+						Text: question,
 					},
 					{
 						Type: "image_url",

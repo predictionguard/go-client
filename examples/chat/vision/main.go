@@ -43,7 +43,7 @@ func run() error {
 	// 	return fmt.Errorf("ERROR: %w", err)
 	// }
 
-	text := "What is this image"
+	text := "Describe what you see in this picture"
 
 	resp, err := cln.ChatVision(ctx, client.Roles.User, text, image, 1000, 1.1)
 	if err != nil {
