@@ -84,7 +84,7 @@ func (cln *Client) do(ctx context.Context, method string, endpoint string, body 
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("copy error: %w", err)
+		return fmt.Errorf("client: copy error: %w", err)
 	}
 
 	switch d := v.(type) {
@@ -93,7 +93,7 @@ func (cln *Client) do(ctx context.Context, method string, endpoint string, body 
 
 	default:
 		if err := json.Unmarshal(data, v); err != nil {
-			return fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
+			return fmt.Errorf("client: response: %s, decoding error: %w ", string(data), err)
 		}
 	}
 
@@ -137,7 +137,7 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 
 			var v T
 			if err := json.Unmarshal([]byte(line[6:]), &v); err != nil {
-				cln.log(ctx, "go-sse: rawRequest:", "Unmarshal", err)
+				cln.log(ctx, "sseclient: rawRequest:", "Unmarshal", err)
 				break
 			}
 
@@ -145,10 +145,10 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 			case ch <- v:
 
 			case <-ctx.Done():
-				cln.log(ctx, "go-sse: rawRequest:", "Context", err)
+				cln.log(ctx, "sseclient: rawRequest:", "Context", err)
 
 			case <-ticker.C:
-				cln.log(ctx, "go-sse: rawRequest:", "WARNING", "timeout waiting for a receiver")
+				cln.log(ctx, "sseclient: rawRequest:", "WARNING", "timeout waiting for a receiver")
 			}
 
 			if ctx.Err() != nil {
@@ -168,15 +168,15 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 func do(ctx context.Context, cln *Client, method string, endpoint string, body any) (*http.Response, error) {
 	var statusCode int
 
-	cln.log(ctx, "go-sse: rawRequest: started", "method", method, "endpoint", endpoint)
+	cln.log(ctx, "do: rawRequest: started", "method", method, "endpoint", endpoint)
 	defer func() {
-		cln.log(ctx, "go-sse: rawRequest: completed", "status", statusCode)
+		cln.log(ctx, "do: rawRequest: completed", "status", statusCode)
 	}()
 
 	var b bytes.Buffer
 	if body != nil {
 		if err := json.NewEncoder(&b).Encode(body); err != nil {
-			return nil, fmt.Errorf("encoding error: %w", err)
+			return nil, fmt.Errorf("encoding: error: %w", err)
 		}
 	}
 
@@ -201,7 +201,7 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 	if statusCode != http.StatusOK {
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("copy error: %w", err)
+			return nil, fmt.Errorf("readall: error: %w", err)
 		}
 
 		switch statusCode {
@@ -211,10 +211,10 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 		default:
 			var err Error
 			if err := json.Unmarshal(data, &err); err != nil {
-				return nil, fmt.Errorf("failed: response: %s, decoding error: %w ", string(data), err)
+				return nil, fmt.Errorf("decoding: response: %s, error: %w ", string(data), err)
 			}
 
-			return nil, fmt.Errorf("failed: response: %s", err.Message)
+			return nil, fmt.Errorf("error: response: %s", err.Message)
 		}
 	}
 

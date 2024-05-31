@@ -43,7 +43,7 @@ go-chat-sse:
 
 curl-chat-vision:
 	curl -il -X POST https://staging.predictionguard.com/chat/completions \
-     -H "x-api-key: ${PGKEY}" \
+     -H "x-api-key: ${PGKEYSTAGE}" \
      -H "Content-Type: application/json" \
      -d '{ \
 		"model": "llava-1.5-7b-hf", \
@@ -64,8 +64,12 @@ curl-chat-vision:
 				] \
 	 	  	} \
 		], \
-		"max_tokens": 300 \
+		"max_tokens": 300, \
+		"temperature": 1.1 \
 	}'
+
+go-chat-vision:
+	go run examples/chat/vision/main.go
 
 curl-comp:
 	curl -il -X POST https://api.predictionguard.com/completions \
@@ -82,7 +86,7 @@ go-comp:
 	go run examples/completions/main.go
 
 curl-embed:
-	curl -il -X POST https://staging.predictionguard.com/embeddings \
+	curl -il -X POST https://api.predictionguard.com/embeddings \
      -H "x-api-key: ${PGKEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
