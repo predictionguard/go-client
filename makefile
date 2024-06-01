@@ -93,11 +93,14 @@ curl-embed:
 		"model": "bridgetower-large-itm-mlm-itc", \
 		"input": [ \
         	{ \
-			"text": "Tell me a joke", \
+			"text": "This is Bill Kennedy, a decent Go developer.", \
             "image": "$(IMAGE)" \
           	} \
     	] \
 	}'
+
+go-embed:
+	go run examples/embedding/main.go
 
 curl-factuality:
 	curl -X POST https://api.predictionguard.com/factuality \

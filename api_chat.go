@@ -2,15 +2,17 @@ package client
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
-	"os"
 )
 
-// ChatMessage represents the role of the sender and the content to process.
+// ChatInput represents a role and content related to a chat.
+type ChatInput struct {
+	Role    Role
+	Content string
+}
+
+// ChatMessage represents the role of the sender and the response.
 type ChatMessage struct {
 	Role    Role   `json:"role"`
 	Content string `json:"content"`
@@ -34,17 +36,31 @@ type Chat struct {
 }
 
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, model Model, input []ChatMessage, maxTokens int, temperature float32) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, model Model, input []ChatInput, maxTokens int, temperature float32) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
+	type chatInput struct {
+		Role    Role   `json:"role"`
+		Content string `json:"content"`
+		Output  string `json:"output"`
+	}
+
+	inputs := make([]chatInput, len(input))
+	for i, inp := range input {
+		inputs[i] = chatInput{
+			Role:    inp.Role,
+			Content: inp.Content,
+		}
+	}
+
 	body := struct {
-		Model       string        `json:"model"`
-		Messages    []ChatMessage `json:"messages"`
-		MaxTokens   int           `json:"max_tokens"`
-		Temperature float32       `json:"temperature"`
+		Model       string      `json:"model"`
+		Messages    []chatInput `json:"messages"`
+		MaxTokens   int         `json:"max_tokens"`
+		Temperature float32     `json:"temperature"`
 	}{
 		Model:       model.name,
-		Messages:    input,
+		Messages:    inputs,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 	}
@@ -83,18 +99,32 @@ type ChatSSE struct {
 }
 
 // ChatSSE generate chat completions based on a conversation history.
-func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatMessage, maxTokens int, temperature float32, ch chan ChatSSE) error {
+func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInput, maxTokens int, temperature float32, ch chan ChatSSE) error {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
+	type chatInput struct {
+		Role    Role   `json:"role"`
+		Content string `json:"content"`
+		Output  string `json:"output"`
+	}
+
+	inputs := make([]chatInput, len(input))
+	for i, inp := range input {
+		inputs[i] = chatInput{
+			Role:    inp.Role,
+			Content: inp.Content,
+		}
+	}
+
 	body := struct {
-		Model       string        `json:"model"`
-		Messages    []ChatMessage `json:"messages"`
-		MaxTokens   int           `json:"max_tokens"`
-		Temperature float32       `json:"temperature"`
-		Stream      bool          `json:"stream"`
+		Model       string      `json:"model"`
+		Messages    []chatInput `json:"messages"`
+		MaxTokens   int         `json:"max_tokens"`
+		Temperature float32     `json:"temperature"`
+		Stream      bool        `json:"stream"`
 	}{
 		Model:       model.name,
-		Messages:    input,
+		Messages:    inputs,
 		MaxTokens:   maxTokens,
 		Temperature: temperature,
 		Stream:      true,
@@ -110,12 +140,6 @@ func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatMessage
 }
 
 // =============================================================================
-
-// Base64Encoder defines a method that can read a data source and returns a
-// base64 encoded string.
-type Base64Encoder interface {
-	EncodeBase64(ctx context.Context) (string, error)
-}
 
 // ChatVisionMessage represents content for the vision call.
 type ChatVisionMessage struct {
@@ -141,7 +165,7 @@ type ChatVision struct {
 }
 
 // ChatVision generate chat completions based on a question and an image.
-func (cln *Client) ChatVision(ctx context.Context, role Role, prompt string, image Base64Encoder, maxTokens int, temperature float32) (ChatVision, error) {
+func (cln *Client) ChatVision(ctx context.Context, role Role, question string, image Base64Encoder, maxTokens int, temperature float32) (ChatVision, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	base64, err := image.EncodeBase64(ctx)
@@ -175,7 +199,7 @@ func (cln *Client) ChatVision(ctx context.Context, role Role, prompt string, ima
 				Content: []content{
 					{
 						Type: "text",
-						Text: prompt,
+						Text: question,
 					},
 					{
 						Type: "image_url",
@@ -198,98 +222,4 @@ func (cln *Client) ChatVision(ctx context.Context, role Role, prompt string, ima
 	}
 
 	return resp, nil
-}
-
-// =============================================================================
-
-// ImageFile represents image data that will be read from a file.
-type ImageFile struct {
-	path   string
-	base64 string
-}
-
-// NewImageFile constructs a ImageFile that can read an image from disk.
-func NewImageFile(imagePath string) (ImageFile, error) {
-	if _, err := os.Stat(imagePath); err != nil {
-		return ImageFile{}, fmt.Errorf("file doesn't exist: %w", err)
-	}
-
-	img := ImageFile{
-		path: imagePath,
-	}
-
-	return img, nil
-}
-
-// EncodeBase64 reads the specified image from disk and converts the image
-// to a base64 string.
-func (img ImageFile) EncodeBase64(ctx context.Context) (string, error) {
-	if img.base64 != "" {
-		return img.base64, nil
-	}
-
-	data, err := os.ReadFile(img.path)
-	if err != nil {
-		return "", fmt.Errorf("readfile: %w", err)
-	}
-
-	img.base64 = b64.StdEncoding.EncodeToString(data)
-
-	return img.base64, nil
-}
-
-// =============================================================================
-
-// ImageNetwork represents image data that will be read from the network.
-type ImageNetwork struct {
-	url    url.URL
-	base64 string
-}
-
-// NewImageNetwork constructs a ImageNetwork that can read an image from the network.
-func NewImageNetwork(imageURL string) (ImageNetwork, error) {
-	url, err := url.Parse(imageURL)
-	if err != nil {
-		return ImageNetwork{}, fmt.Errorf("url doesn't parse: %w", err)
-	}
-
-	img := ImageNetwork{
-		url: *url,
-	}
-
-	return img, nil
-}
-
-// EncodeBase64 reads the specified image from the network and converts the
-// image to a base64 string.
-func (img ImageNetwork) EncodeBase64(ctx context.Context) (string, error) {
-	if img.base64 != "" {
-		return img.base64, nil
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, img.url.String(), nil)
-	if err != nil {
-		return "", fmt.Errorf("create request error: %w", err)
-	}
-
-	req.Header.Set("Cache-Control", "no-cache")
-	req.Header.Set("Accept", "image/*")
-
-	resp, err := defaultClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("do: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("status: %d", resp.StatusCode)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("readall: %w", err)
-	}
-
-	img.base64 = b64.StdEncoding.EncodeToString(data)
-
-	return img.base64, nil
 }
