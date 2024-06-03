@@ -1,10 +1,19 @@
 package client
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// Base64Encoder defines a method that can read a data source and returns a
+// base64 encoded string.
+type Base64Encoder interface {
+	EncodeBase64(ctx context.Context) (string, error)
+}
+
+// =============================================================================
 
 // Error represents an error in the system.
 type Error struct {

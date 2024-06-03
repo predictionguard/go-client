@@ -33,12 +33,26 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
+	image, err := client.NewImageNetwork("https://pbs.twimg.com/profile_images/1571574401107169282/ylAgz_f5_400x400.jpg")
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	fmt.Println(resp.Choices[0].Text)
+	input := []client.EmbeddingInput{
+		{
+			Text:  "This is Bill Kennedy, a decent Go developer.",
+			Image: image,
+		},
+	}
+
+	resp, err := cln.Embedding(ctx, input)
+	if err != nil {
+		return fmt.Errorf("ERROR: %w", err)
+	}
+
+	for _, data := range resp.Data {
+		fmt.Print(data.Embedding)
+	}
 
 	return nil
 }

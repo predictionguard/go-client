@@ -3,22 +3,26 @@ package client
 import "fmt"
 
 type modelSet struct {
-	Hermes2ProLlama38B       Model
-	NousHermesLlama213B      Model
-	Hermes2ProMistral7B      Model
-	NeuralChat7B             Model
-	Yi34BChat                Model
-	DeepseekCoder67BInstruct Model
+	BridgetowerLargeItmMlmItc Model
+	DeepseekCoder67BInstruct  Model
+	Hermes2ProLlama38B        Model
+	Hermes2ProMistral7B       Model
+	Llava157BHF               Model
+	NeuralChat7B              Model
+	NousHermesLlama213B       Model
+	Yi34BChat                 Model
 }
 
 // Models represents the set of models that can be used.
 var Models = modelSet{
-	Hermes2ProLlama38B:       newModel("Hermes-2-Pro-Llama-3-8B"),
-	NousHermesLlama213B:      newModel("Nous-Hermes-Llama-213B"),
-	Hermes2ProMistral7B:      newModel("Hermes-2-Pro-Mistral-7B"),
-	NeuralChat7B:             newModel("Neural-Chat-7B"),
-	Yi34BChat:                newModel("Yi-34B-Chat"),
-	DeepseekCoder67BInstruct: newModel("deepseek-coder-6.7b-instruct"),
+	BridgetowerLargeItmMlmItc: newModel("bridgetower-large-itm-mlm-itc"),
+	DeepseekCoder67BInstruct:  newModel("deepseek-coder-6.7b-instruct"),
+	Hermes2ProLlama38B:        newModel("Hermes-2-Pro-Llama-3-8B"),
+	Hermes2ProMistral7B:       newModel("Hermes-2-Pro-Mistral-7B"),
+	Llava157BHF:               newModel("llava-1.5-7b-hf"),
+	NeuralChat7B:              newModel("Neural-Chat-7B"),
+	NousHermesLlama213B:       newModel("Nous-Hermes-Llama-213B"),
+	Yi34BChat:                 newModel("Yi-34B-Chat"),
 }
 
 // Parse parses the string value and returns a model if one exists.
@@ -58,8 +62,8 @@ func newModel(model string) Model {
 	return r
 }
 
-// Name returns the name of the Model.
-func (r Model) Name() string {
+// String returns the name of the Model.
+func (r Model) String() string {
 	return r.name
 }
 

@@ -188,8 +188,8 @@ func newLanguage(code string) Language {
 	return l
 }
 
-// Code returns the ISO-639 code of the language.
-func (l Language) Code() string {
+// String returns the ISO-639 code of the language.
+func (l Language) String() string {
 	return l.code
 }
 
