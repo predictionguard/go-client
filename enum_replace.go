@@ -54,8 +54,8 @@ func newReplaceMethod(replaceMethod string) ReplaceMethod {
 	return rm
 }
 
-// Name returns the name of the replace method.
-func (rm ReplaceMethod) Name() string {
+// String returns the name of the replace method.
+func (rm ReplaceMethod) String() string {
 	return rm.name
 }
 

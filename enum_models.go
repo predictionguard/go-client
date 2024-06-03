@@ -62,8 +62,8 @@ func newModel(model string) Model {
 	return r
 }
 
-// Name returns the name of the Model.
-func (r Model) Name() string {
+// String returns the name of the Model.
+func (r Model) String() string {
 	return r.name
 }
 

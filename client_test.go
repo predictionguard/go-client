@@ -23,6 +23,7 @@ func Test_Client(t *testing.T) {
 
 	runTests(t, chatTests(service), "chat")
 	runTests(t, completionTests(service), "completion")
+	runTests(t, embeddingTests(service), "embedding")
 	runTests(t, factualityTests(service), "factuality")
 	runTests(t, injectionTests(service), "injection")
 	runTests(t, replacepiTests(service), "replacepi")
@@ -157,6 +158,42 @@ func chatTests(srv *service) []table {
 			},
 		},
 		{
+			Name: "vision",
+			ExpResp: client.ChatVision{
+				ID:      "chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT",
+				Object:  "chat_completion",
+				Created: client.ToTime(1717441090),
+				Model:   client.Models.Llava157BHF,
+				Choices: []client.ChatVisionChoice{
+					{
+						Index: 0,
+						Message: client.ChatVisionMessage{
+							Role:    client.Roles.Assistant,
+							Content: "No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.",
+							Output:  "",
+						},
+						Status: "success",
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				question := "Is there a deer in this picture?"
+
+				resp, err := srv.Client.ChatVision(ctx, client.Roles.User, question, client.ImageBase64{}, 1000, 0.1)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
 			Name:    "badkey",
 			ExpResp: client.ErrUnauthorized,
 			ExcFunc: func(ctx context.Context) any {
@@ -247,6 +284,53 @@ func completionTests(srv *service) []table {
 				}
 
 				return ""
+			},
+		},
+	}
+
+	return table
+}
+
+func embeddingTests(srv *service) []table {
+	table := []table{
+		{
+			Name: "basic",
+			ExpResp: client.Embedding{
+				ID:      "emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw",
+				Object:  "embedding_batch",
+				Created: client.ToTime(1717439154),
+				Model:   client.Models.BridgetowerLargeItmMlmItc,
+				Data: []client.EmbeddingData{
+					{
+						Index:  0,
+						Object: "embedding",
+						Embedding: []float64{
+							0.04457271471619606,
+						},
+						Status: "success",
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := []client.EmbeddingInput{
+					{
+						Text:  "This is Bill Kennedy, a decent Go developer.",
+						Image: client.ImageBase64{},
+					},
+				}
+
+				resp, err := srv.Client.Embedding(ctx, input)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
 			},
 		},
 	}
@@ -686,8 +770,9 @@ func newService(t *testing.T) *service {
 
 	mux.HandleFunc("/chat/completions", s.chat)
 	mux.HandleFunc("/completions", s.completion)
-	mux.HandleFunc("/injection", s.injection)
 	mux.HandleFunc("/factuality", s.factuality)
+	mux.HandleFunc("/embeddings", s.embeddings)
+	mux.HandleFunc("/injection", s.injection)
 	mux.HandleFunc("/PII", s.replacePI)
 	mux.HandleFunc("/toxicity", s.toxicity)
 	mux.HandleFunc("/translate", s.translate)
@@ -702,7 +787,8 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Stream bool `json:"stream"`
+		Model  string `json:"model"`
+		Stream bool   `json:"stream"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -715,7 +801,14 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat_completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
+	var resp string
+	switch {
+	case body.Model == client.Models.Llava157BHF.String():
+		resp = `{"id":"chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT","object":"chat_completion","created":1717441090,"model":"llava-1.5-7b-hf","choices":[{"index":0,"message":{"role":"assistant","content":"No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.","output":null},"status":"success"}]}`
+
+	default:
+		resp = `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat_completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -761,13 +854,13 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-func (s *service) injection(w http.ResponseWriter, r *http.Request) {
+func (s *service) embeddings(w http.ResponseWriter, r *http.Request) {
 	if v := r.Header.Get("x-api-key"); v == "" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	resp := `{"checks":[{"probability":0.5,"index":0,"status":"success"}],"created":"1715729859","id":"injection-Nb817UlEMTog2YOe1JHYbq2oUyZAW7Lk","object":"injection_check"}`
+	resp := `{"id":"emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw","object":"embedding_batch","created":1717439154,"model":"bridgetower-large-itm-mlm-itc","data":[{"status":"success","index":0,"object":"embedding","embedding":[0.04457271471619606]}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -781,6 +874,19 @@ func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := `{"checks":[{"score":0.7879658937454224,"index":0,"status":"success"}],"created":1715730425,"id":"fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R","object":"factuality_check"}`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
+}
+
+func (s *service) injection(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("x-api-key"); v == "" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	resp := `{"checks":[{"probability":0.5,"index":0,"status":"success"}],"created":"1715729859","id":"injection-Nb817UlEMTog2YOe1JHYbq2oUyZAW7Lk","object":"injection_check"}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

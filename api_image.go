@@ -101,3 +101,22 @@ func (img ImageNetwork) EncodeBase64(ctx context.Context) (string, error) {
 
 	return img.base64, nil
 }
+
+// =============================================================================
+
+// ImageBase64 represents image data that is already in base64.
+type ImageBase64 struct {
+	base64 string
+}
+
+// NewImageBase64 constructs a ImageBase64 with an encoded image.
+func NewImageBase64(base64 string) ImageBase64 {
+	return ImageBase64{
+		base64: base64,
+	}
+}
+
+// EncodeBase64 returns the base64 image provided during construction.
+func (img ImageBase64) EncodeBase64(ctx context.Context) (string, error) {
+	return img.base64, nil
+}
