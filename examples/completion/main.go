@@ -33,7 +33,15 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
+	input := client.CompletionInput{
+		Model:       client.Models.NeuralChat7B,
+		Prompt:      "Will I lose my hair",
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
+	}
+
+	resp, err := cln.Completions(ctx, input)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

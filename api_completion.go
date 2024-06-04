@@ -6,6 +6,15 @@ import (
 	"net/http"
 )
 
+// CompletionInput represents the full potential input options for completion.
+type CompletionInput struct {
+	Model       Model
+	Prompt      string
+	MaxTokens   int
+	Temperature float32
+	TopP        float64
+}
+
 // CompletionChoice represents a choice for the completion call.
 type CompletionChoice struct {
 	Text   string `json:"text"`
@@ -23,7 +32,7 @@ type Completion struct {
 }
 
 // Completions retrieve text completions based on the provided input.
-func (cln *Client) Completions(ctx context.Context, model Model, prompt string, maxTokens int, temperature float32) (Completion, error) {
+func (cln *Client) Completions(ctx context.Context, input CompletionInput) (Completion, error) {
 	url := fmt.Sprintf("%s/completions", cln.host)
 
 	body := struct {
@@ -31,11 +40,13 @@ func (cln *Client) Completions(ctx context.Context, model Model, prompt string, 
 		Prompt      string  `json:"prompt"`
 		MaxTokens   int     `json:"max_tokens"`
 		Temperature float32 `json:"temperature"`
+		TopP        float64 `json:"top_p"`
 	}{
-		Model:       model.name,
-		Prompt:      prompt,
-		MaxTokens:   maxTokens,
-		Temperature: temperature,
+		Model:       input.Model.name,
+		Prompt:      input.Prompt,
+		MaxTokens:   input.MaxTokens,
+		Temperature: input.Temperature,
+		TopP:        input.TopP,
 	}
 
 	var resp Completion

@@ -33,16 +33,22 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatInputMessage{
-		{
-			Role:    client.Roles.User,
-			Content: "How do you feel about the world in general",
+	input := client.ChatSSEInput{
+		Model: client.Models.NeuralChat7B,
+		Messages: []client.ChatInputMessage{
+			{
+				Role:    client.Roles.User,
+				Content: "How do you feel about the world in general",
+			},
 		},
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
 	}
 
 	ch := make(chan client.ChatSSE, 100)
 
-	err := cln.ChatSSE(ctx, client.Models.NeuralChat7B, input, 1000, 1.1, ch)
+	err := cln.ChatSSE(ctx, input, ch)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

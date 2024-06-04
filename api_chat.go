@@ -126,6 +126,15 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 
 // =============================================================================
 
+// ChatSSEInput represents the full potential input options for SSE chat.
+type ChatSSEInput struct {
+	Model       Model
+	Messages    []ChatInputMessage
+	MaxTokens   int
+	Temperature float32
+	TopP        float64
+}
+
 // ChatSSEDelta represents content for the sse call.
 type ChatSSEDelta struct {
 	Content string `json:"content"`
@@ -150,7 +159,7 @@ type ChatSSE struct {
 }
 
 // ChatSSE generate chat completions based on a conversation history.
-func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInputMessage, maxTokens int, temperature float32, ch chan ChatSSE) error {
+func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan ChatSSE) error {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	type chatInput struct {
@@ -159,9 +168,9 @@ func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInputMe
 		Output  string `json:"output"`
 	}
 
-	inputs := make([]chatInput, len(input))
-	for i, inp := range input {
-		inputs[i] = chatInput{
+	messages := make([]chatInput, len(input.Messages))
+	for i, inp := range input.Messages {
+		messages[i] = chatInput{
 			Role:    inp.Role,
 			Content: inp.Content,
 		}
@@ -172,12 +181,14 @@ func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInputMe
 		Messages    []chatInput `json:"messages"`
 		MaxTokens   int         `json:"max_tokens"`
 		Temperature float32     `json:"temperature"`
+		TopP        float64     `json:"top_p"`
 		Stream      bool        `json:"stream"`
 	}{
-		Model:       model.name,
-		Messages:    inputs,
-		MaxTokens:   maxTokens,
-		Temperature: temperature,
+		Model:       input.Model.name,
+		Messages:    messages,
+		MaxTokens:   input.MaxTokens,
+		Temperature: input.Temperature,
+		TopP:        input.TopP,
 		Stream:      true,
 	}
 
@@ -191,6 +202,16 @@ func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInputMe
 }
 
 // =============================================================================
+
+// ChatVisionInput represents the full potential input options for vision chat.
+type ChatVisionInput struct {
+	Role        Role
+	Question    string
+	Image       Base64Encoder
+	MaxTokens   int
+	Temperature float32
+	TopP        float64
+}
 
 // ChatVisionMessage represents content for the vision call.
 type ChatVisionMessage struct {
@@ -216,10 +237,10 @@ type ChatVision struct {
 }
 
 // ChatVision generate chat completions based on a question and an image.
-func (cln *Client) ChatVision(ctx context.Context, role Role, question string, image Base64Encoder, maxTokens int, temperature float32) (ChatVision, error) {
+func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatVision, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
-	base64, err := image.EncodeBase64(ctx)
+	base64, err := input.Image.EncodeBase64(ctx)
 	if err != nil {
 		return ChatVision{}, fmt.Errorf("base64: %w", err)
 	}
@@ -242,15 +263,16 @@ func (cln *Client) ChatVision(ctx context.Context, role Role, question string, i
 		Messages    []message `json:"messages"`
 		MaxTokens   int       `json:"max_tokens"`
 		Temperature float32   `json:"temperature"`
+		TopP        float64   `json:"top_p"`
 	}{
 		Model: Models.Llava157BHF.name,
 		Messages: []message{
 			{
-				Role: role,
+				Role: input.Role,
 				Content: []content{
 					{
 						Type: "text",
-						Text: question,
+						Text: input.Question,
 					},
 					{
 						Type: "image_url",
@@ -263,8 +285,9 @@ func (cln *Client) ChatVision(ctx context.Context, role Role, question string, i
 				},
 			},
 		},
-		MaxTokens:   maxTokens,
-		Temperature: temperature,
+		MaxTokens:   input.MaxTokens,
+		Temperature: input.Temperature,
+		TopP:        input.TopP,
 	}
 
 	var resp ChatVision

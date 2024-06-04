@@ -43,9 +43,16 @@ func run() error {
 	// 	return fmt.Errorf("ERROR: %w", err)
 	// }
 
-	question := "Is there a deer in this picture?"
+	input := client.ChatVisionInput{
+		Role:        client.Roles.User,
+		Question:    "Is there a deer in this picture?",
+		Image:       image,
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
+	}
 
-	resp, err := cln.ChatVision(ctx, client.Roles.User, question, image, 300, 0.1)
+	resp, err := cln.ChatVision(ctx, input)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

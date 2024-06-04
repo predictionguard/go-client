@@ -139,16 +139,22 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				input := []client.ChatInputMessage{
-					{
-						Role:    client.Roles.User,
-						Content: "How do you feel about the world in general",
+				input := client.ChatSSEInput{
+					Model: client.Models.NeuralChat7B,
+					Messages: []client.ChatInputMessage{
+						{
+							Role:    client.Roles.User,
+							Content: "How do you feel about the world in general",
+						},
 					},
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
 				}
 
 				ch := make(chan client.ChatSSE)
 
-				if err := srv.Client.ChatSSE(ctx, client.Models.NeuralChat7B, input, 1000, 1.1, ch); err != nil {
+				if err := srv.Client.ChatSSE(ctx, input, ch); err != nil {
 					return err
 				}
 
@@ -186,9 +192,16 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				question := "Is there a deer in this picture?"
+				input := client.ChatVisionInput{
+					Role:        client.Roles.User,
+					Question:    "Is there a deer in this picture?",
+					Image:       client.ImageBase64{},
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
+				}
 
-				resp, err := srv.Client.ChatVision(ctx, client.Roles.User, question, client.ImageBase64{}, 1000, 0.1)
+				resp, err := srv.Client.ChatVision(ctx, input)
 				if err != nil {
 					return err
 				}
@@ -253,7 +266,15 @@ func completionTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.Client.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
+				input := client.CompletionInput{
+					Model:       client.Models.NeuralChat7B,
+					Prompt:      "Will I lose my hair",
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
+				}
+
+				resp, err := srv.Client.Completions(ctx, input)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -271,7 +292,15 @@ func completionTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Completions(ctx, client.Models.NeuralChat7B, "", 1000, 0.1)
+				input := client.CompletionInput{
+					Model:       client.Models.NeuralChat7B,
+					Prompt:      "Will I lose my hair",
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
+				}
+
+				resp, err := srv.BadClient.Completions(ctx, input)
 				if err != nil {
 					return err
 				}
@@ -1005,16 +1034,22 @@ func ExampleChatSSE() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatInputMessage{
-		{
-			Role:    client.Roles.User,
-			Content: "How do you feel about the world in general",
+	input := client.ChatSSEInput{
+		Model: client.Models.NeuralChat7B,
+		Messages: []client.ChatInputMessage{
+			{
+				Role:    client.Roles.User,
+				Content: "How do you feel about the world in general",
+			},
 		},
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
 	}
 
 	ch := make(chan client.ChatSSE, 100)
 
-	err := cln.ChatSSE(ctx, client.Models.NeuralChat7B, input, 1000, 1.1, ch)
+	err := cln.ChatSSE(ctx, input, ch)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}
@@ -1023,6 +1058,49 @@ func ExampleChatSSE() {
 		for _, choice := range resp.Choices {
 			fmt.Print(choice.Delta.Content)
 		}
+	}
+}
+
+func ExampleChatVision() {
+	// examples/chat/vision/main.go
+
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PGKEY")
+
+	logger := func(ctx context.Context, msg string, v ...any) {
+		s := fmt.Sprintf("msg: %s", msg)
+		for i := 0; i < len(v); i = i + 2 {
+			s = s + fmt.Sprintf(", %s: %v", v[i], v[i+1])
+		}
+		log.Println(s)
+	}
+
+	cln := client.New(logger, host, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	image, err := client.NewImageNetwork("https://pbs.twimg.com/profile_images/1571574401107169282/ylAgz_f5_400x400.jpg")
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	input := client.ChatVisionInput{
+		Role:        client.Roles.User,
+		Question:    "Is there a deer in this picture?",
+		Image:       image,
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
+	}
+
+	resp, err := cln.ChatVision(ctx, input)
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	for i, choice := range resp.Choices {
+		fmt.Printf("choice %d: %s\n", i, choice.Message.Content)
 	}
 }
 
@@ -1045,7 +1123,15 @@ func ExampleCompletion() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := cln.Completions(ctx, client.Models.NeuralChat7B, "Will I lose my hair", 1000, 0.1)
+	input := client.CompletionInput{
+		Model:       client.Models.NeuralChat7B,
+		Prompt:      "Will I lose my hair",
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
+	}
+
+	resp, err := cln.Completions(ctx, input)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}

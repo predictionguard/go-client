@@ -88,7 +88,8 @@ curl-comp:
 		"model": "Neural-Chat-7B", \
 		"prompt": "Will I lose my hair", \
 		"max_tokens": 1000, \
-		"temperature": 1.1 \
+		"temperature": 1.1, \
+		"top_p": 0.1 \
 	}'
 
 go-comp:
