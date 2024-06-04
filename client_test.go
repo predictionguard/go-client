@@ -56,14 +56,20 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				input := []client.ChatInput{
-					{
-						Role:    client.Roles.User,
-						Content: "How do you feel about the world in general",
+				input := client.ChatInput{
+					Model: client.Models.NeuralChat7B,
+					Messages: []client.ChatInputMessage{
+						{
+							Role:    client.Roles.User,
+							Content: "How do you feel about the world in general",
+						},
 					},
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
 				}
 
-				resp, err := srv.Client.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 0.1)
+				resp, err := srv.Client.Chat(ctx, input)
 				if err != nil {
 					return err
 				}
@@ -133,7 +139,7 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				input := []client.ChatInput{
+				input := []client.ChatInputMessage{
 					{
 						Role:    client.Roles.User,
 						Content: "How do you feel about the world in general",
@@ -200,7 +206,7 @@ func chatTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Chat(ctx, client.Models.NeuralChat7B, []client.ChatInput{}, 1000, 0.1)
+				resp, err := srv.BadClient.Chat(ctx, client.ChatInput{})
 				if err != nil {
 					return err
 				}
@@ -953,14 +959,26 @@ func ExampleChat() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatInput{
-		{
-			Role:    client.Roles.User,
-			Content: "How do you feel about the world in general",
+	input := client.ChatInput{
+		Model: client.Models.NeuralChat7B,
+		Messages: []client.ChatInputMessage{
+			{
+				Role:    client.Roles.User,
+				Content: "How do you feel about the world in general",
+			},
+		},
+		MaxTokens:   1000,
+		Temperature: 0.1,
+		TopP:        0.1,
+		Options: &client.ChatInputOptions{
+			Factuality:       true,
+			Toxicity:         true,
+			PII:              client.PIIs.Replace,
+			PIIReplaceMethod: client.ReplaceMethods.Random,
 		},
 	}
 
-	resp, err := cln.Chat(ctx, client.Models.NeuralChat7B, input, 1000, 0.1)
+	resp, err := cln.Chat(ctx, input)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}
@@ -987,7 +1005,7 @@ func ExampleChatSSE() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatInput{
+	input := []client.ChatInputMessage{
 		{
 			Role:    client.Roles.User,
 			Content: "How do you feel about the world in general",
