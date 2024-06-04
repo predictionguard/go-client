@@ -6,10 +6,29 @@ import (
 	"net/http"
 )
 
-// ChatInput represents a role and content related to a chat.
+// ChatInput represents the full potential input options for chat.
 type ChatInput struct {
+	Model       Model
+	Messages    []ChatInputMessage
+	MaxTokens   int
+	Temperature float32
+	TopP        float64
+	Options     *ChatInputOptions
+}
+
+// ChatInputMessage represents a role and content related to a chat.
+type ChatInputMessage struct {
 	Role    Role
 	Content string
+}
+
+// ChatInputOptions represents options for post and preprocessing the input.
+type ChatInputOptions struct {
+	Factuality           bool
+	Toxicity             bool
+	BlockPromptInjection bool
+	PII                  PII
+	PIIReplaceMethod     ReplaceMethod
 }
 
 // ChatMessage represents the role of the sender and the response.
@@ -36,33 +55,65 @@ type Chat struct {
 }
 
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, model Model, input []ChatInput, maxTokens int, temperature float32) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
-	type chatInput struct {
+	type chatMessage struct {
 		Role    Role   `json:"role"`
 		Content string `json:"content"`
 		Output  string `json:"output"`
 	}
 
-	inputs := make([]chatInput, len(input))
-	for i, inp := range input {
-		inputs[i] = chatInput{
+	type chatOutputOption struct {
+		Factuality bool `json:"factuality"`
+		Toxicity   bool `json:"toxicity"`
+	}
+
+	type chatInputOption struct {
+		BlockPromptInjection bool          `json:"block_prompt_injection"`
+		PII                  string        `json:"pii"`
+		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
+	}
+
+	inputs := make([]chatMessage, len(input.Messages))
+	for i, inp := range input.Messages {
+		inputs[i] = chatMessage{
 			Role:    inp.Role,
 			Content: inp.Content,
 		}
 	}
 
 	body := struct {
-		Model       string      `json:"model"`
-		Messages    []chatInput `json:"messages"`
-		MaxTokens   int         `json:"max_tokens"`
-		Temperature float32     `json:"temperature"`
+		Model       string            `json:"model"`
+		Messages    []chatMessage     `json:"messages"`
+		MaxTokens   int               `json:"max_tokens"`
+		Temperature float32           `json:"temperature"`
+		TopP        float64           `json:"top_p"`
+		Output      *chatOutputOption `json:"output,omitempty"`
+		Input       *chatInputOption  `json:"input,omitempty"`
 	}{
-		Model:       model.name,
+		Model:       input.Model.name,
 		Messages:    inputs,
-		MaxTokens:   maxTokens,
-		Temperature: temperature,
+		MaxTokens:   input.MaxTokens,
+		Temperature: input.Temperature,
+		TopP:        input.TopP,
+	}
+
+	if input.Options != nil {
+		if input.Options.Factuality || input.Options.Toxicity {
+			body.Output = &chatOutputOption{
+				Factuality: input.Options.Factuality,
+				Toxicity:   input.Options.Toxicity,
+			}
+		}
+
+		if (input.Options.BlockPromptInjection || input.Options.PII != PII{} || input.Options.PIIReplaceMethod != ReplaceMethod{}) {
+			body.Input = &chatInputOption{
+				BlockPromptInjection: input.Options.BlockPromptInjection,
+				PII:                  input.Options.PII.name,
+				PIIReplaceMethod:     input.Options.PIIReplaceMethod,
+			}
+		}
 	}
 
 	var resp Chat
@@ -99,7 +150,7 @@ type ChatSSE struct {
 }
 
 // ChatSSE generate chat completions based on a conversation history.
-func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInput, maxTokens int, temperature float32, ch chan ChatSSE) error {
+func (cln *Client) ChatSSE(ctx context.Context, model Model, input []ChatInputMessage, maxTokens int, temperature float32, ch chan ChatSSE) error {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	type chatInput struct {

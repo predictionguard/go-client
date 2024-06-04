@@ -33,7 +33,7 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.ChatInput{
+	input := []client.ChatInputMessage{
 		{
 			Role:    client.Roles.User,
 			Content: "How do you feel about the world in general",
