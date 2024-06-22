@@ -6,24 +6,24 @@ import (
 	"net/http"
 )
 
-// ReplacePICheck represents the result for the pii call.
-type ReplacePICheck struct {
+// ReplacePIICheck represents the result for the pii call.
+type ReplacePIICheck struct {
 	NewPrompt string `json:"new_prompt"`
 	Index     int    `json:"index"`
 	Status    string `json:"status"`
 }
 
-// ReplacePI represents the result for the pii call.
-type ReplacePI struct {
-	ID      string           `json:"id"`
-	Object  string           `json:"object"`
-	Created Time             `json:"created"`
-	Checks  []ReplacePICheck `json:"checks"`
+// ReplacePII represents the result for the pii call.
+type ReplacePII struct {
+	ID      string            `json:"id"`
+	Object  string            `json:"object"`
+	Created Time              `json:"created"`
+	Checks  []ReplacePIICheck `json:"checks"`
 }
 
-// ReplacePI replaces personal information such as names, SSNs, and emails in a
+// ReplacePII replaces personal information such as names, SSNs, and emails in a
 // given text.
-func (cln *Client) ReplacePI(ctx context.Context, prompt string, method ReplaceMethod) (ReplacePI, error) {
+func (cln *Client) ReplacePII(ctx context.Context, prompt string, method ReplaceMethod) (ReplacePII, error) {
 	url := fmt.Sprintf("%s/PII", cln.host)
 
 	body := struct {
@@ -36,9 +36,9 @@ func (cln *Client) ReplacePI(ctx context.Context, prompt string, method ReplaceM
 		Method:  method,
 	}
 
-	var resp ReplacePI
+	var resp ReplacePII
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
-		return ReplacePI{}, err
+		return ReplacePII{}, err
 	}
 
 	return resp, nil

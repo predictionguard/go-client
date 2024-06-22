@@ -26,7 +26,7 @@ func Test_Client(t *testing.T) {
 	runTests(t, embeddingTests(service), "embedding")
 	runTests(t, factualityTests(service), "factuality")
 	runTests(t, injectionTests(service), "injection")
-	runTests(t, replacepiTests(service), "replacepi")
+	runTests(t, ReplacePIITests(service), "ReplacePII")
 	runTests(t, toxicityTests(service), "toxicity")
 	runTests(t, translateTests(service), "translate")
 }
@@ -506,15 +506,15 @@ func injectionTests(srv *service) []table {
 	return table
 }
 
-func replacepiTests(srv *service) []table {
+func ReplacePIITests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
-			ExpResp: client.ReplacePI{
+			ExpResp: client.ReplacePII{
 				ID:      "pii-ax9rE9ld3W5yxN1Sz7OKxXkMTMo736jJ",
 				Object:  "pii_check",
 				Created: client.ToTime(1715730803),
-				Checks: []client.ReplacePICheck{
+				Checks: []client.ReplacePIICheck{
 					{
 						NewPrompt: "My email is * and my number is *.",
 						Index:     0,
@@ -528,7 +528,7 @@ func replacepiTests(srv *service) []table {
 
 				prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-				resp, err := srv.Client.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
+				resp, err := srv.Client.ReplacePII(ctx, prompt, client.ReplaceMethods.Mask)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -546,7 +546,7 @@ func replacepiTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.ReplacePI(ctx, "", client.ReplaceMethods.Mask)
+				resp, err := srv.BadClient.ReplacePII(ctx, "", client.ReplaceMethods.Mask)
 				if err != nil {
 					return err
 				}
@@ -808,7 +808,7 @@ func newService(t *testing.T) *service {
 	mux.HandleFunc("/factuality", s.factuality)
 	mux.HandleFunc("/embeddings", s.embeddings)
 	mux.HandleFunc("/injection", s.injection)
-	mux.HandleFunc("/PII", s.replacePI)
+	mux.HandleFunc("/PII", s.ReplacePII)
 	mux.HandleFunc("/toxicity", s.toxicity)
 	mux.HandleFunc("/translate", s.translate)
 
@@ -816,7 +816,7 @@ func newService(t *testing.T) *service {
 }
 
 func (s *service) chat(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -877,7 +877,7 @@ func (s *service) chatSSE(w http.ResponseWriter) {
 }
 
 func (s *service) completion(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -890,7 +890,7 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) embeddings(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -903,7 +903,7 @@ func (s *service) embeddings(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -916,7 +916,7 @@ func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) injection(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -928,8 +928,8 @@ func (s *service) injection(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-func (s *service) replacePI(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+func (s *service) ReplacePII(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -942,7 +942,7 @@ func (s *service) replacePI(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) toxicity(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -955,7 +955,7 @@ func (s *service) toxicity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) translate(w http.ResponseWriter, r *http.Request) {
-	if v := r.Header.Get("x-api-key"); v == "" {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -1198,8 +1198,8 @@ func ExampleInjection() {
 	fmt.Println(resp.Checks[0].Probability)
 }
 
-func ExampleReplacePI() {
-	// examples/replacepi/main.go
+func ExampleReplacePII() {
+	// examples/ReplacePII/main.go
 
 	host := "https://api.predictionguard.com"
 	apiKey := os.Getenv("PGKEY")
@@ -1219,7 +1219,7 @@ func ExampleReplacePI() {
 
 	prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-	resp, err := cln.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
+	resp, err := cln.ReplacePII(ctx, prompt, client.ReplaceMethods.Mask)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}

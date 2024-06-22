@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v0.10.0"
+const version = "v0.11.0"
 
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
@@ -192,7 +192,7 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", fmt.Sprintf("Prediction Guard Go Client: %s", version))
-	req.Header.Set("x-api-key", cln.apiKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", cln.apiKey))
 
 	resp, err := cln.http.Do(req)
 	if err != nil {

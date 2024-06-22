@@ -35,7 +35,7 @@ func run() error {
 
 	prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-	resp, err := cln.ReplacePI(ctx, prompt, client.ReplaceMethods.Mask)
+	resp, err := cln.ReplacePII(ctx, prompt, client.ReplaceMethods.Mask)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
