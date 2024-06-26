@@ -50,6 +50,7 @@ func run() error {
 		MaxTokens:   1000,
 		Temperature: 0.1,
 		TopP:        0.1,
+		TopK:        50.0,
 	}
 
 	resp, err := cln.ChatVision(ctx, input)

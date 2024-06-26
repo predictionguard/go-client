@@ -19,6 +19,7 @@ curl-chat:
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
 		"top_p": 0.1, \
+		"top_k": 50.0, \
 		"output": { \
 			"factuality": true, \
 			"toxicity": true \
@@ -44,7 +45,11 @@ curl-chat-sse:
 			"content": "How do you feel about the world in general" \
 			} \
 		], \
-		"stream": true \
+		"stream": true, \
+		"max_tokens": 300, \
+		"temperature": 0.1, \
+		"top_p": 0.1, \
+		"top_k": 50.0 \
 	}'
 
 go-chat-sse:
@@ -74,7 +79,9 @@ curl-chat-vision:
 	 	  	} \
 		], \
 		"max_tokens": 300, \
-		"temperature": 0.1 \
+		"temperature": 0.1, \
+		"top_p": 0.1, \
+		"top_k": 50.0 \
 	}'
 
 go-chat-vision:
@@ -89,7 +96,8 @@ curl-comp:
 		"prompt": "Will I lose my hair", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
-		"top_p": 0.1 \
+		"top_p": 0.1, \
+		"top_k": 50.0 \
 	}'
 
 go-comp:

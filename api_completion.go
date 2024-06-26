@@ -13,6 +13,7 @@ type CompletionInput struct {
 	MaxTokens   int
 	Temperature float32
 	TopP        float64
+	TopK        float64
 }
 
 // CompletionChoice represents a choice for the completion call.
@@ -41,12 +42,14 @@ func (cln *Client) Completions(ctx context.Context, input CompletionInput) (Comp
 		MaxTokens   int     `json:"max_tokens"`
 		Temperature float32 `json:"temperature"`
 		TopP        float64 `json:"top_p"`
+		TopK        float64 `json:"top_k"`
 	}{
 		Model:       input.Model.name,
 		Prompt:      input.Prompt,
 		MaxTokens:   input.MaxTokens,
 		Temperature: input.Temperature,
 		TopP:        input.TopP,
+		TopK:        input.TopK,
 	}
 
 	var resp Completion
