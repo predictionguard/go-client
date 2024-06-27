@@ -4,6 +4,11 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Examples
 
+curl-chat-get:
+	curl -i -X GET https://api.predictionguard.com/chat/completions \
+     -H "Authorization: Bearer ${PGKEY}" \
+     -H "Content-Type: application/json"
+
 curl-chat:
 	curl -i -X POST https://api.predictionguard.com/chat/completions \
      -H "Authorization: Bearer ${PGKEY}" \
@@ -86,6 +91,11 @@ curl-chat-vision:
 
 go-chat-vision:
 	go run examples/chat/vision/main.go
+
+curl-embed-get:
+	curl -i -X GET https://api.predictionguard.com/embeddings \
+     -H "Authorization: Bearer ${PGKEY}" \
+     -H "Content-Type: application/json"
 
 curl-comp:
 	curl -i -X POST https://api.predictionguard.com/completions \

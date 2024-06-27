@@ -2,9 +2,20 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 )
+
+// Set of models supported by these APIs.
+var chatModels = map[Model]bool{
+	Models.DeepseekCoder67BInstruct: true,
+	Models.Hermes2ProLlama38B:       true,
+	Models.Hermes2ProMistral7B:      true,
+	Models.LLama3SqlCoder8b:         true,
+	Models.Llava157BHF:              true,
+	Models.NeuralChat7B:             true,
+}
 
 // ChatInput represents the full potential input options for chat.
 type ChatInput struct {
@@ -74,6 +85,10 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 		BlockPromptInjection bool          `json:"block_prompt_injection"`
 		PII                  string        `json:"pii"`
 		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
+	}
+
+	if !chatModels[input.Model] {
+		return Chat{}, errors.New("model specified is not supported")
 	}
 
 	inputs := make([]chatMessage, len(input.Messages))
@@ -170,6 +185,10 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		Role    Role   `json:"role"`
 		Content string `json:"content"`
 		Output  string `json:"output"`
+	}
+
+	if !chatModels[input.Model] {
+		return errors.New("model specified is not supported")
 	}
 
 	messages := make([]chatInput, len(input.Messages))

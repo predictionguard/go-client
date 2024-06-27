@@ -7,6 +7,7 @@ type modelSet struct {
 	DeepseekCoder67BInstruct  Model
 	Hermes2ProLlama38B        Model
 	Hermes2ProMistral7B       Model
+	LLama3SqlCoder8b          Model
 	Llava157BHF               Model
 	NeuralChat7B              Model
 	NousHermesLlama213B       Model
@@ -19,6 +20,7 @@ var Models = modelSet{
 	DeepseekCoder67BInstruct:  newModel("deepseek-coder-6.7b-instruct"),
 	Hermes2ProLlama38B:        newModel("Hermes-2-Pro-Llama-3-8B"),
 	Hermes2ProMistral7B:       newModel("Hermes-2-Pro-Mistral-7B"),
+	LLama3SqlCoder8b:          newModel("llama-3-sqlcoder-8b"),
 	Llava157BHF:               newModel("llava-1.5-7b-hf"),
 	NeuralChat7B:              newModel("Neural-Chat-7B"),
 	NousHermesLlama213B:       newModel("Nous-Hermes-Llama-213B"),

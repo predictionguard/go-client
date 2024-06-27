@@ -2,9 +2,19 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 )
+
+// Set of models supported by this API.
+var completionModels = map[Model]bool{
+	Models.DeepseekCoder67BInstruct: true,
+	Models.Hermes2ProLlama38B:       true,
+	Models.Hermes2ProMistral7B:      true,
+	Models.NeuralChat7B:             true,
+	Models.NousHermesLlama213B:      true,
+}
 
 // CompletionInput represents the full potential input options for completion.
 type CompletionInput struct {
@@ -35,6 +45,10 @@ type Completion struct {
 // Completions retrieve text completions based on the provided input.
 func (cln *Client) Completions(ctx context.Context, input CompletionInput) (Completion, error) {
 	url := fmt.Sprintf("%s/completions", cln.host)
+
+	if !completionModels[input.Model] {
+		return Completion{}, errors.New("model specified is not supported")
+	}
 
 	body := struct {
 		Model       string  `json:"model"`

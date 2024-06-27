@@ -213,13 +213,41 @@ func chatTests(srv *service) []table {
 			},
 		},
 		{
+			Name:    "badmodel",
+			ExpResp: errors.New("model specified is not supported"),
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.Client.Chat(ctx, client.ChatInput{})
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if gotErr.Error() != expErr.Error() {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
+		{
 			Name:    "badkey",
 			ExpResp: client.ErrUnauthorized,
 			ExcFunc: func(ctx context.Context) any {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Chat(ctx, client.ChatInput{})
+				resp, err := srv.BadClient.Chat(ctx, client.ChatInput{Model: client.Models.Hermes2ProLlama38B})
 				if err != nil {
 					return err
 				}
@@ -283,6 +311,42 @@ func completionTests(srv *service) []table {
 			},
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:    "badmodel",
+			ExpResp: errors.New("model specified is not supported"),
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := client.CompletionInput{
+					Model:       client.Models.BridgetowerLargeItmMlmItc,
+					Prompt:      "Will I lose my hair",
+					MaxTokens:   1000,
+					Temperature: 0.1,
+					TopP:        0.1,
+				}
+
+				resp, err := srv.Client.Completions(ctx, input)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if gotErr.Error() != expErr.Error() {
+					return "diff"
+				}
+
+				return ""
 			},
 		},
 		{
@@ -741,23 +805,19 @@ type table struct {
 }
 
 func runTests(t *testing.T, table []table, testName string) {
-	log := func(diff string, got any, exp any) {
-		t.Log("DIFF")
-		t.Logf("%s", diff)
-		t.Log("GOT")
-		t.Logf("%#v", got)
-		t.Log("EXP")
-		t.Logf("%#v", exp)
-		t.Fatal("Should get the expected response")
-	}
-
 	for _, tt := range table {
 		f := func(t *testing.T) {
 			gotResp := tt.ExcFunc(context.Background())
 
 			diff := tt.CmpFunc(gotResp, tt.ExpResp)
 			if diff != "" {
-				log(diff, gotResp, tt.ExpResp)
+				t.Log("DIFF")
+				t.Logf("%s", diff)
+				t.Log("GOT")
+				t.Logf("%#v", gotResp)
+				t.Log("EXP")
+				t.Logf("%#v", tt.ExpResp)
+				t.Fatal("Should get the expected response")
 			}
 		}
 
