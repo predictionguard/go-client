@@ -11,7 +11,6 @@ type modelSet struct {
 	Llava157BHF               Model
 	NeuralChat7B              Model
 	NousHermesLlama213B       Model
-	Yi34BChat                 Model
 }
 
 // Models represents the set of models that can be used.
@@ -24,7 +23,6 @@ var Models = modelSet{
 	Llava157BHF:               newModel("llava-1.5-7b-hf"),
 	NeuralChat7B:              newModel("Neural-Chat-7B"),
 	NousHermesLlama213B:       newModel("Nous-Hermes-Llama-213B"),
-	Yi34BChat:                 newModel("Yi-34B-Chat"),
 }
 
 // Parse parses the string value and returns a model if one exists.
