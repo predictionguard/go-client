@@ -26,17 +26,19 @@ type Translate struct {
 }
 
 // Translate converts text from one language to another.
-func (cln *Client) Translate(ctx context.Context, text string, source Language, target Language) (Translate, error) {
+func (cln *Client) Translate(ctx context.Context, text string, source Language, target Language, useThirdPartyEngine bool) (Translate, error) {
 	url := fmt.Sprintf("%s/translate", cln.host)
 
 	body := struct {
-		Text   string   `json:"text"`
-		Source Language `json:"source_lang"`
-		Target Language `json:"target_lang"`
+		Text                string   `json:"text"`
+		Source              Language `json:"source_lang"`
+		Target              Language `json:"target_lang"`
+		UseThirdPartyEngine bool     `json:"use_third_party_engine"`
 	}{
-		Text:   text,
-		Source: source,
-		Target: target,
+		Text:                text,
+		Source:              source,
+		Target:              target,
+		UseThirdPartyEngine: useThirdPartyEngine,
 	}
 
 	var resp Translate

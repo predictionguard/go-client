@@ -748,7 +748,7 @@ func translateTests(srv *service) []table {
 				source := client.Languages.English
 				target := client.Languages.Spanish
 
-				resp, err := srv.Client.Translate(ctx, text, source, target)
+				resp, err := srv.Client.Translate(ctx, text, source, target, false)
 				if err != nil {
 					return fmt.Errorf("ERROR: %w", err)
 				}
@@ -769,7 +769,7 @@ func translateTests(srv *service) []table {
 				source := client.Languages.English
 				target := client.Languages.Spanish
 
-				resp, err := srv.BadClient.Translate(ctx, "", source, target)
+				resp, err := srv.BadClient.Translate(ctx, "", source, target, false)
 				if err != nil {
 					return err
 				}
@@ -1029,11 +1029,11 @@ func (s *service) translate(w http.ResponseWriter, r *http.Request) {
 
 // =============================================================================
 
-func ExampleChat() {
+func ExampleClient_Chat() {
 	// examples/chat/basic/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1075,11 +1075,11 @@ func ExampleChat() {
 	fmt.Println(resp.Choices[0].Message.Content)
 }
 
-func ExampleChatSSE() {
+func ExampleClient_ChatSSE() {
 	// examples/chat/sse/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1121,11 +1121,11 @@ func ExampleChatSSE() {
 	}
 }
 
-func ExampleChatVision() {
+func ExampleClient_ChatVision() {
 	// examples/chat/vision/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1164,11 +1164,11 @@ func ExampleChatVision() {
 	}
 }
 
-func ExampleCompletion() {
+func ExampleClient_Completions() {
 	// examples/completion/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1199,11 +1199,11 @@ func ExampleCompletion() {
 	fmt.Println(resp.Choices[0].Text)
 }
 
-func ExampleFactuality() {
+func ExampleClient_Factuality() {
 	// examples/factuality/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1229,11 +1229,11 @@ func ExampleFactuality() {
 	log.Println(resp.Checks[0])
 }
 
-func ExampleInjection() {
+func ExampleClient_Injection() {
 	// examples/injection/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1258,11 +1258,11 @@ func ExampleInjection() {
 	fmt.Println(resp.Checks[0].Probability)
 }
 
-func ExampleReplacePII() {
+func ExampleClient_ReplacePII() {
 	// examples/ReplacePII/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1287,11 +1287,11 @@ func ExampleReplacePII() {
 	fmt.Println(resp.Checks[0].NewPrompt)
 }
 
-func ExampleToxicity() {
+func ExampleClient_Toxicity() {
 	// examples/toxicity/main.go
 
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1316,9 +1316,9 @@ func ExampleToxicity() {
 	fmt.Println(resp.Checks[0].Score)
 }
 
-func ExampleTranslate() {
+func ExampleClient_Translate() {
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -1335,7 +1335,7 @@ func ExampleTranslate() {
 
 	text := "The rain in Spain stays mainly in the plain"
 
-	resp, err := cln.Translate(ctx, text, client.Languages.English, client.Languages.Spanish)
+	resp, err := cln.Translate(ctx, text, client.Languages.English, client.Languages.Spanish, false)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}

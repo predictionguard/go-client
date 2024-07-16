@@ -18,7 +18,7 @@ func main() {
 
 func run() error {
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -35,7 +35,7 @@ func run() error {
 
 	text := "The rain in Spain stays mainly in the plain"
 
-	resp, err := cln.Translate(ctx, text, client.Languages.English, client.Languages.Spanish)
+	resp, err := cln.Translate(ctx, text, client.Languages.English, client.Languages.Spanish, false)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

@@ -17,8 +17,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://staging.predictionguard.com"
-	apiKey := os.Getenv("PGKEYSTAGE")
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -37,11 +37,6 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
-
-	// image, err := client.NewImageFile("/Users/bill/Documents/images/pGwOq5tz_400x400.jpg")
-	// if err != nil {
-	// 	return fmt.Errorf("ERROR: %w", err)
-	// }
 
 	input := client.ChatVisionInput{
 		Role:        client.Roles.User,

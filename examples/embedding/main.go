@@ -18,7 +18,7 @@ func main() {
 
 func run() error {
 	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
