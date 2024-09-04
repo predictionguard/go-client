@@ -64,7 +64,7 @@ func chatTests(srv *service) []table {
 							Content: "How do you feel about the world in general",
 						},
 					},
-					MaxTokens:   1000,
+					MaxTokens:   client.Ptr(1000),
 					Temperature: client.Ptr[float32](0.1),
 					TopP:        client.Ptr(0.1),
 				}
@@ -147,7 +147,7 @@ func chatTests(srv *service) []table {
 							Content: "How do you feel about the world in general",
 						},
 					},
-					MaxTokens:   1000,
+					MaxTokens:   client.Ptr(1000),
 					Temperature: client.Ptr[float32](0.1),
 					TopP:        client.Ptr(0.1),
 				}
@@ -1056,7 +1056,7 @@ func ExampleClient_Chat() {
 				Content: "How do you feel about the world in general",
 			},
 		},
-		MaxTokens:   1000,
+		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
 		Options: &client.ChatInputOptions{
@@ -1102,7 +1102,7 @@ func ExampleClient_ChatSSE() {
 				Content: "How do you feel about the world in general",
 			},
 		},
-		MaxTokens:   1000,
+		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
 	}

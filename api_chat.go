@@ -21,7 +21,7 @@ var chatModels = map[Model]bool{
 type ChatInput struct {
 	Model       Model
 	Messages    []ChatInputMessage
-	MaxTokens   int
+	MaxTokens   *int
 	Temperature *float32
 	TopP        *float64
 	TopK        *float64
@@ -102,7 +102,7 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 	body := struct {
 		Model       string            `json:"model"`
 		Messages    []chatMessage     `json:"messages"`
-		MaxTokens   int               `json:"max_tokens"`
+		MaxTokens   *int              `json:"max_tokens,omitempty"`
 		Temperature *float32          `json:"temperature,omitempty"`
 		TopP        *float64          `json:"top_p,omitempty"`
 		TopK        *float64          `json:"top_k,omitempty"`
@@ -148,7 +148,7 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 type ChatSSEInput struct {
 	Model       Model
 	Messages    []ChatInputMessage
-	MaxTokens   int
+	MaxTokens   *int
 	Temperature *float32
 	TopP        *float64
 	TopK        *float64
@@ -202,7 +202,7 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 	body := struct {
 		Model       string      `json:"model"`
 		Messages    []chatInput `json:"messages"`
-		MaxTokens   int         `json:"max_tokens"`
+		MaxTokens   *int        `json:"max_tokens,omitempty"`
 		Temperature *float32    `json:"temperature,omitempty"`
 		TopP        *float64    `json:"top_p,omitempty"`
 		TopK        *float64    `json:"top_k,omitempty"`
