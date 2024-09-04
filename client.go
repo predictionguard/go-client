@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v0.14.0"
+const version = "v0.15.0"
 
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
@@ -223,4 +223,11 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 	}
 
 	return resp, nil
+}
+
+// =============================================================================
+
+// Ptr converts any value into a pointer of that value.
+func Ptr[T any](t T) *T {
+	return &t
 }

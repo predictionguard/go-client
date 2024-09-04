@@ -65,8 +65,8 @@ func chatTests(srv *service) []table {
 						},
 					},
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				resp, err := srv.Client.Chat(ctx, input)
@@ -148,8 +148,8 @@ func chatTests(srv *service) []table {
 						},
 					},
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				ch := make(chan client.ChatSSE)
@@ -197,8 +197,8 @@ func chatTests(srv *service) []table {
 					Question:    "Is there a deer in this picture?",
 					Image:       client.ImageBase64{},
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				resp, err := srv.Client.ChatVision(ctx, input)
@@ -298,8 +298,8 @@ func completionTests(srv *service) []table {
 					Model:       client.Models.NeuralChat7B,
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				resp, err := srv.Client.Completions(ctx, input)
@@ -324,8 +324,8 @@ func completionTests(srv *service) []table {
 					Model:       client.Models.BridgetowerLargeItmMlmItc,
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				resp, err := srv.Client.Completions(ctx, input)
@@ -360,8 +360,8 @@ func completionTests(srv *service) []table {
 					Model:       client.Models.NeuralChat7B,
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
-					Temperature: 0.1,
-					TopP:        0.1,
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
 				}
 
 				resp, err := srv.BadClient.Completions(ctx, input)
@@ -1057,8 +1057,8 @@ func ExampleClient_Chat() {
 			},
 		},
 		MaxTokens:   1000,
-		Temperature: 0.1,
-		TopP:        0.1,
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
 		Options: &client.ChatInputOptions{
 			Factuality:       true,
 			Toxicity:         true,
@@ -1103,8 +1103,8 @@ func ExampleClient_ChatSSE() {
 			},
 		},
 		MaxTokens:   1000,
-		Temperature: 0.1,
-		TopP:        0.1,
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
 	}
 
 	ch := make(chan client.ChatSSE, 100)
@@ -1150,8 +1150,8 @@ func ExampleClient_ChatVision() {
 		Question:    "Is there a deer in this picture?",
 		Image:       image,
 		MaxTokens:   1000,
-		Temperature: 0.1,
-		TopP:        0.1,
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
 	}
 
 	resp, err := cln.ChatVision(ctx, input)
@@ -1187,8 +1187,8 @@ func ExampleClient_Completions() {
 		Model:       client.Models.NeuralChat7B,
 		Prompt:      "Will I lose my hair",
 		MaxTokens:   1000,
-		Temperature: 0.1,
-		TopP:        0.1,
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
 	}
 
 	resp, err := cln.Completions(ctx, input)
