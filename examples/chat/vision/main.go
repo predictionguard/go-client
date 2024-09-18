@@ -33,14 +33,15 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	image, err := client.NewImageNetwork("https://pbs.twimg.com/profile_images/1571574401107169282/ylAgz_f5_400x400.jpg")
+	image, err := client.NewImageNetwork("https://predictionguard.com/lib_eltrNYEjQbpUWFRI/oy2r533pndpk0q8q.png?w=1024&dpr=2")
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	input := client.ChatVisionInput{
+		Model:       "llava-1.5-7b-hf",
 		Role:        client.Roles.User,
-		Question:    "Is there a deer in this picture?",
+		Question:    "Is there a computer in this picture?",
 		Image:       image,
 		MaxTokens:   1000,
 		Temperature: client.Ptr[float32](0.1),

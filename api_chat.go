@@ -2,24 +2,13 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 )
 
-// Set of models supported by these APIs.
-var chatModels = map[Model]bool{
-	Models.DeepseekCoder67BInstruct: true,
-	Models.Hermes2ProLlama38B:       true,
-	Models.Hermes2ProMistral7B:      true,
-	Models.LLama3SqlCoder8b:         true,
-	Models.Llava157BHF:              true,
-	Models.NeuralChat7B:             true,
-}
-
 // ChatInput represents the full potential input options for chat.
 type ChatInput struct {
-	Model       Model
+	Model       string
 	Messages    []ChatInputMessage
 	MaxTokens   *int
 	Temperature *float32
@@ -62,7 +51,7 @@ type Chat struct {
 	ID      string       `json:"id"`
 	Object  string       `json:"object"`
 	Created Time         `json:"created"`
-	Model   Model        `json:"model"`
+	Model   string       `json:"model"`
 	Choices []ChatChoice `json:"choices"`
 }
 
@@ -87,10 +76,6 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
 	}
 
-	if !chatModels[input.Model] {
-		return Chat{}, errors.New("model specified is not supported")
-	}
-
 	inputs := make([]chatMessage, len(input.Messages))
 	for i, inp := range input.Messages {
 		inputs[i] = chatMessage{
@@ -109,7 +94,7 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 		Output      *chatOutputOption `json:"output,omitempty"`
 		Input       *chatInputOption  `json:"input,omitempty"`
 	}{
-		Model:       input.Model.name,
+		Model:       input.Model,
 		Messages:    inputs,
 		MaxTokens:   input.MaxTokens,
 		Temperature: input.Temperature,
@@ -146,7 +131,7 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 
 // ChatSSEInput represents the full potential input options for SSE chat.
 type ChatSSEInput struct {
-	Model       Model
+	Model       string
 	Messages    []ChatInputMessage
 	MaxTokens   *int
 	Temperature *float32
@@ -173,7 +158,7 @@ type ChatSSE struct {
 	ID      string          `json:"id"`
 	Object  string          `json:"object"`
 	Created Time            `json:"created"`
-	Model   Model           `json:"model"`
+	Model   string          `json:"model"`
 	Choices []ChatSSEChoice `json:"choices"`
 }
 
@@ -185,10 +170,6 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		Role    Role   `json:"role"`
 		Content string `json:"content"`
 		Output  string `json:"output"`
-	}
-
-	if !chatModels[input.Model] {
-		return errors.New("model specified is not supported")
 	}
 
 	messages := make([]chatInput, len(input.Messages))
@@ -208,7 +189,7 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		TopK        *float64    `json:"top_k,omitempty"`
 		Stream      bool        `json:"stream"`
 	}{
-		Model:       input.Model.name,
+		Model:       input.Model,
 		Messages:    messages,
 		MaxTokens:   input.MaxTokens,
 		Temperature: input.Temperature,
@@ -230,6 +211,7 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 
 // ChatVisionInput represents the full potential input options for vision chat.
 type ChatVisionInput struct {
+	Model       string
 	Role        Role
 	Question    string
 	Image       Base64Encoder
@@ -258,7 +240,7 @@ type ChatVision struct {
 	ID      string             `json:"id"`
 	Object  string             `json:"object"`
 	Created Time               `json:"created"`
-	Model   Model              `json:"model"`
+	Model   string             `json:"model"`
 	Choices []ChatVisionChoice `json:"choices"`
 }
 
@@ -292,7 +274,7 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		TopP        *float64  `json:"top_p,omitempty"`
 		TopK        *float64  `json:"top_k,omitempty"`
 	}{
-		Model: Models.Llava157BHF.name,
+		Model: input.Model,
 		Messages: []message{
 			{
 				Role: input.Role,

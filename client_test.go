@@ -39,7 +39,7 @@ func chatTests(srv *service) []table {
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
 				Object:  "chat_completion",
 				Created: client.ToTime(1715628729),
-				Model:   client.Models.NeuralChat7B,
+				Model:   "Neural-Chat-7B",
 				Choices: []client.ChatChoice{
 					{
 						Index: 0,
@@ -57,7 +57,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatInput{
-					Model: client.Models.NeuralChat7B,
+					Model: "Neural-Chat-7B",
 					Messages: []client.ChatInputMessage{
 						{
 							Role:    client.Roles.User,
@@ -87,7 +87,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734993),
-					Model:   client.Models.NeuralChat7B,
+					Model:   "Neural-Chat-7B",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -104,7 +104,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-afH2BnyvKPvon2r16DkUWJygbvePY",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734993),
-					Model:   client.Models.NeuralChat7B,
+					Model:   "Neural-Chat-7B",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -121,7 +121,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734995),
-					Model:   client.Models.NeuralChat7B,
+					Model:   "Neural-Chat-7B",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -140,7 +140,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatSSEInput{
-					Model: client.Models.NeuralChat7B,
+					Model: "Neural-Chat-7B",
 					Messages: []client.ChatInputMessage{
 						{
 							Role:    client.Roles.User,
@@ -175,7 +175,7 @@ func chatTests(srv *service) []table {
 				ID:      "chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT",
 				Object:  "chat_completion",
 				Created: client.ToTime(1717441090),
-				Model:   client.Models.Llava157BHF,
+				Model:   "llava-1.5-7b-hf",
 				Choices: []client.ChatVisionChoice{
 					{
 						Index: 0,
@@ -193,6 +193,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatVisionInput{
+					Model:       "llava-1.5-7b-hf",
 					Role:        client.Roles.User,
 					Question:    "Is there a deer in this picture?",
 					Image:       client.ImageBase64{},
@@ -213,41 +214,13 @@ func chatTests(srv *service) []table {
 			},
 		},
 		{
-			Name:    "badmodel",
-			ExpResp: errors.New("model specified is not supported"),
-			ExcFunc: func(ctx context.Context) any {
-				ctx, cancel := context.WithTimeout(ctx, time.Second)
-				defer cancel()
-
-				resp, err := srv.Client.Chat(ctx, client.ChatInput{})
-				if err != nil {
-					return err
-				}
-
-				return resp
-			},
-			CmpFunc: func(got any, exp any) string {
-				gotErr, ok := got.(error)
-				if !ok {
-					return "didn't get an error"
-				}
-				expErr := exp.(error)
-
-				if gotErr.Error() != expErr.Error() {
-					return "diff"
-				}
-
-				return ""
-			},
-		},
-		{
 			Name:    "badkey",
 			ExpResp: client.ErrUnauthorized,
 			ExcFunc: func(ctx context.Context) any {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				resp, err := srv.BadClient.Chat(ctx, client.ChatInput{Model: client.Models.Hermes2ProLlama38B})
+				resp, err := srv.BadClient.Chat(ctx, client.ChatInput{Model: "Hermes-2-Pro-Llama-3-8B"})
 				if err != nil {
 					return err
 				}
@@ -295,7 +268,7 @@ func completionTests(srv *service) []table {
 				defer cancel()
 
 				input := client.CompletionInput{
-					Model:       client.Models.NeuralChat7B,
+					Model:       "Neural-Chat-7B",
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
 					Temperature: client.Ptr[float32](0.1),
@@ -314,42 +287,6 @@ func completionTests(srv *service) []table {
 			},
 		},
 		{
-			Name:    "badmodel",
-			ExpResp: errors.New("model specified is not supported"),
-			ExcFunc: func(ctx context.Context) any {
-				ctx, cancel := context.WithTimeout(ctx, time.Second)
-				defer cancel()
-
-				input := client.CompletionInput{
-					Model:       client.Models.BridgetowerLargeItmMlmItc,
-					Prompt:      "Will I lose my hair",
-					MaxTokens:   1000,
-					Temperature: client.Ptr[float32](0.1),
-					TopP:        client.Ptr(0.1),
-				}
-
-				resp, err := srv.Client.Completions(ctx, input)
-				if err != nil {
-					return err
-				}
-
-				return resp
-			},
-			CmpFunc: func(got any, exp any) string {
-				gotErr, ok := got.(error)
-				if !ok {
-					return "didn't get an error"
-				}
-				expErr := exp.(error)
-
-				if gotErr.Error() != expErr.Error() {
-					return "diff"
-				}
-
-				return ""
-			},
-		},
-		{
 			Name:    "badkey",
 			ExpResp: client.ErrUnauthorized,
 			ExcFunc: func(ctx context.Context) any {
@@ -357,7 +294,7 @@ func completionTests(srv *service) []table {
 				defer cancel()
 
 				input := client.CompletionInput{
-					Model:       client.Models.NeuralChat7B,
+					Model:       "Neural-Chat-7B",
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
 					Temperature: client.Ptr[float32](0.1),
@@ -398,7 +335,7 @@ func embeddingTests(srv *service) []table {
 				ID:      "emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw",
 				Object:  "embedding_batch",
 				Created: client.ToTime(1717439154),
-				Model:   client.Models.BridgetowerLargeItmMlmItc,
+				Model:   "bridgetower-large-itm-mlm-itc",
 				Data: []client.EmbeddingData{
 					{
 						Index:  0,
@@ -421,7 +358,7 @@ func embeddingTests(srv *service) []table {
 					},
 				}
 
-				resp, err := srv.Client.Embedding(ctx, input)
+				resp, err := srv.Client.Embedding(ctx, "bridgetower-large-itm-mlm-itc", input)
 				if err != nil {
 					return err
 				}
@@ -897,8 +834,8 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var resp string
-	switch {
-	case body.Model == client.Models.Llava157BHF.String():
+	switch body.Model {
+	case "llava-1.5-7b-hf":
 		resp = `{"id":"chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT","object":"chat_completion","created":1717441090,"model":"llava-1.5-7b-hf","choices":[{"index":0,"message":{"role":"assistant","content":"No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.","output":null},"status":"success"}]}`
 
 	default:
@@ -1049,7 +986,7 @@ func ExampleClient_Chat() {
 	defer cancel()
 
 	input := client.ChatInput{
-		Model: client.Models.NeuralChat7B,
+		Model: "Neural-Chat-7B",
 		Messages: []client.ChatInputMessage{
 			{
 				Role:    client.Roles.User,
@@ -1095,7 +1032,7 @@ func ExampleClient_ChatSSE() {
 	defer cancel()
 
 	input := client.ChatSSEInput{
-		Model: client.Models.NeuralChat7B,
+		Model: "Neural-Chat-7B",
 		Messages: []client.ChatInputMessage{
 			{
 				Role:    client.Roles.User,
@@ -1146,6 +1083,7 @@ func ExampleClient_ChatVision() {
 	}
 
 	input := client.ChatVisionInput{
+		Model:       "llava-1.5-7b-hf",
 		Role:        client.Roles.User,
 		Question:    "Is there a deer in this picture?",
 		Image:       image,
@@ -1184,7 +1122,7 @@ func ExampleClient_Completions() {
 	defer cancel()
 
 	input := client.CompletionInput{
-		Model:       client.Models.NeuralChat7B,
+		Model:       "Neural-Chat-7B",
 		Prompt:      "Will I lose my hair",
 		MaxTokens:   1000,
 		Temperature: client.Ptr[float32](0.1),

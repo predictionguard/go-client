@@ -25,7 +25,7 @@ type Embedding struct {
 	ID      string          `json:"id"`
 	Object  string          `json:"object"`
 	Created Time            `json:"created"`
-	Model   Model           `json:"model"`
+	Model   string          `json:"model"`
 	Data    []EmbeddingData `json:"data"`
 }
 
@@ -33,7 +33,7 @@ type Embedding struct {
 // that is useful for search and retrieval. When you have both text and image,
 // the use case would be like a video frame plus the transcription or an image
 // plus a caption. The response should include the output vector.
-func (cln *Client) Embedding(ctx context.Context, input []EmbeddingInput) (Embedding, error) {
+func (cln *Client) Embedding(ctx context.Context, model string, input []EmbeddingInput) (Embedding, error) {
 	url := fmt.Sprintf("%s/embeddings", cln.host)
 
 	type embeddingInput struct {
@@ -62,7 +62,7 @@ func (cln *Client) Embedding(ctx context.Context, input []EmbeddingInput) (Embed
 		Model string           `json:"model"`
 		Input []embeddingInput `json:"input"`
 	}{
-		Model: Models.BridgetowerLargeItmMlmItc.name,
+		Model: model,
 		Input: data,
 	}
 

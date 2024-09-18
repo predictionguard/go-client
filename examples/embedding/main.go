@@ -45,7 +45,7 @@ func run() error {
 		},
 	}
 
-	resp, err := cln.Embedding(ctx, input)
+	resp, err := cln.Embedding(ctx, "bridgetower-large-itm-mlm-itc", input)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
