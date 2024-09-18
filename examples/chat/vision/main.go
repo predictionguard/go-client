@@ -46,7 +46,7 @@ func run() error {
 		MaxTokens:   1000,
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		TopK:        client.Ptr(50.0),
+		TopK:        client.Ptr(50),
 	}
 
 	resp, err := cln.ChatVision(ctx, input)

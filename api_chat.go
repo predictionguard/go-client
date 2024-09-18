@@ -13,7 +13,7 @@ type ChatInput struct {
 	MaxTokens   *int
 	Temperature *float32
 	TopP        *float64
-	TopK        *float64
+	TopK        *int
 	Options     *ChatInputOptions
 }
 
@@ -90,7 +90,7 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 		MaxTokens   *int              `json:"max_tokens,omitempty"`
 		Temperature *float32          `json:"temperature,omitempty"`
 		TopP        *float64          `json:"top_p,omitempty"`
-		TopK        *float64          `json:"top_k,omitempty"`
+		TopK        *int              `json:"top_k,omitempty"`
 		Output      *chatOutputOption `json:"output,omitempty"`
 		Input       *chatInputOption  `json:"input,omitempty"`
 	}{
@@ -136,7 +136,7 @@ type ChatSSEInput struct {
 	MaxTokens   *int
 	Temperature *float32
 	TopP        *float64
-	TopK        *float64
+	TopK        *int
 }
 
 // ChatSSEDelta represents content for the sse call.
@@ -186,7 +186,7 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		MaxTokens   *int        `json:"max_tokens,omitempty"`
 		Temperature *float32    `json:"temperature,omitempty"`
 		TopP        *float64    `json:"top_p,omitempty"`
-		TopK        *float64    `json:"top_k,omitempty"`
+		TopK        *int        `json:"top_k,omitempty"`
 		Stream      bool        `json:"stream"`
 	}{
 		Model:       input.Model,
@@ -218,7 +218,7 @@ type ChatVisionInput struct {
 	MaxTokens   int
 	Temperature *float32
 	TopP        *float64
-	TopK        *float64
+	TopK        *int
 }
 
 // ChatVisionMessage represents content for the vision call.
@@ -272,7 +272,7 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		MaxTokens   int       `json:"max_tokens"`
 		Temperature *float32  `json:"temperature,omitempty"`
 		TopP        *float64  `json:"top_p,omitempty"`
-		TopK        *float64  `json:"top_k,omitempty"`
+		TopK        *int      `json:"top_k,omitempty"`
 	}{
 		Model: input.Model,
 		Messages: []message{

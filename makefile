@@ -24,7 +24,7 @@ curl-chat:
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
 		"top_p": 0.1, \
-		"top_k": 50.0, \
+		"top_k": 50, \
 		"output": { \
 			"factuality": true, \
 			"toxicity": true \
@@ -54,7 +54,7 @@ curl-chat-sse:
 		"max_tokens": 300, \
 		"temperature": 0.1, \
 		"top_p": 0.1, \
-		"top_k": 50.0 \
+		"top_k": 50 \
 	}'
 
 go-chat-sse:
@@ -86,7 +86,7 @@ curl-chat-vision:
 		"max_tokens": 300, \
 		"temperature": 0.1, \
 		"top_p": 0.1, \
-		"top_k": 50.0 \
+		"top_k": 50 \
 	}'
 
 go-chat-vision:
@@ -107,7 +107,7 @@ curl-comp:
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
 		"top_p": 0.1, \
-		"top_k": 50.0 \
+		"top_k": 50 \
 	}'
 
 go-comp:
