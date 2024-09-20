@@ -339,7 +339,6 @@ func embeddingTests(srv *service) []table {
 						Embedding: []float64{
 							0.04457271471619606,
 						},
-						Status: "success",
 					},
 				},
 			},
@@ -380,9 +379,8 @@ func factualityTests(srv *service) []table {
 				Created: client.ToTime(1715730425),
 				Checks: []client.FactualityCheck{
 					{
-						Score:  0.7879658937454224,
-						Index:  0,
-						Status: "success",
+						Score: 0.7879658937454224,
+						Index: 0,
 					},
 				},
 			},
@@ -579,9 +577,8 @@ func toxicityTests(srv *service) []table {
 				Created: client.ToTime(1715731131),
 				Checks: []client.ToxicityCheck{
 					{
-						Score:  0.7072361707687378,
-						Index:  0,
-						Status: "success",
+						Score: 0.7072361707687378,
+						Index: 0,
 					},
 				},
 			},

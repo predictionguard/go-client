@@ -8,9 +8,8 @@ import (
 
 // FactualityCheck represents the result for the factuality call.
 type FactualityCheck struct {
-	Score  float64 `json:"score"`
-	Index  int     `json:"index"`
-	Status string  `json:"status"`
+	Score float64 `json:"score"`
+	Index int     `json:"index"`
 }
 
 // Factuality represents the result for the factuality call.

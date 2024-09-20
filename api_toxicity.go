@@ -8,9 +8,8 @@ import (
 
 // ToxicityCheck represents the result for the toxicity call.
 type ToxicityCheck struct {
-	Score  float64 `json:"score"`
-	Index  int     `json:"index"`
-	Status string  `json:"status"`
+	Score float64 `json:"score"`
+	Index int     `json:"index"`
 }
 
 // Toxicity represents the result for the toxicity call.

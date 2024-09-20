@@ -16,7 +16,6 @@ type EmbeddingInput struct {
 type EmbeddingData struct {
 	Index     int       `json:"index"`
 	Object    string    `json:"object"`
-	Status    string    `json:"status"`
 	Embedding []float64 `json:"embedding"`
 }
 
