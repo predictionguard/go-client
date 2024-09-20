@@ -231,7 +231,6 @@ type ChatVisionMessage struct {
 type ChatVisionChoice struct {
 	Index   int               `json:"index"`
 	Message ChatVisionMessage `json:"message"`
-	Status  string            `json:"status"`
 }
 
 // ChatVision represents the result for the vision call.

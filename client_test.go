@@ -183,7 +183,6 @@ func chatTests(srv *service) []table {
 							Content: "No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.",
 							Output:  "",
 						},
-						Status: "success",
 					},
 				},
 			},
