@@ -18,10 +18,8 @@ type CompletionInput struct {
 
 // CompletionChoice represents a choice for the completion call.
 type CompletionChoice struct {
-	Text   string `json:"text"`
-	Index  int    `json:"index"`
-	Status string `json:"status"`
-	Model  string `json:"model"`
+	Text  string `json:"text"`
+	Index int    `json:"index"`
 }
 
 // Completion represents the result for the completion call.

@@ -48,7 +48,6 @@ func chatTests(srv *service) []table {
 							Content: "The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.",
 							Output:  "",
 						},
-						Status: "success",
 					},
 				},
 			},
@@ -256,10 +255,8 @@ func completionTests(srv *service) []table {
 				Created: client.ToTime(1715632193),
 				Choices: []client.CompletionChoice{
 					{
-						Text:   "after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.",
-						Index:  0,
-						Status: "success",
-						Model:  "Neural-Chat-7B",
+						Text:  "after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.",
+						Index: 0,
 					},
 				},
 			},

@@ -43,7 +43,6 @@ type ChatMessage struct {
 type ChatChoice struct {
 	Index   int         `json:"index"`
 	Message ChatMessage `json:"message"`
-	Status  string      `json:"status"`
 }
 
 // Chat represents the result for the chat call.
