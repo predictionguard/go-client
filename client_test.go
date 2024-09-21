@@ -46,7 +46,6 @@ func chatTests(srv *service) []table {
 						Message: client.ChatMessage{
 							Role:    client.Roles.Assistant,
 							Content: "The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.",
-							Output:  "",
 						},
 					},
 				},
@@ -181,7 +180,6 @@ func chatTests(srv *service) []table {
 						Message: client.ChatVisionMessage{
 							Role:    client.Roles.Assistant,
 							Content: "No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.",
-							Output:  "",
 						},
 					},
 				},

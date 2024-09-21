@@ -36,7 +36,6 @@ type ChatInputOptions struct {
 type ChatMessage struct {
 	Role    Role   `json:"role"`
 	Content string `json:"content"`
-	Output  string `json:"output"`
 }
 
 // ChatChoice represents a choice for the chat call.
@@ -224,7 +223,6 @@ type ChatVisionInput struct {
 type ChatVisionMessage struct {
 	Role    Role   `json:"role"`
 	Content string `json:"content"`
-	Output  string `json:"output"`
 }
 
 // ChatVisionChoice represents a choice for the vision call.
