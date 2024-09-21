@@ -33,9 +33,14 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := client.ChatInput{
-		Model:       "Neural-Chat-7B",
-		Message:     "How do you feel about the world in general",
+	inputMulti := client.ChatInputMulti{
+		Model: "Neural-Chat-7B",
+		Messages: []client.ChatInputMessage{
+			{
+				Role:    client.Roles.User,
+				Content: "How do you feel about the world in general",
+			},
+		},
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
@@ -48,7 +53,7 @@ func run() error {
 		},
 	}
 
-	resp, err := cln.Chat(ctx, input)
+	resp, err := cln.Chat(ctx, inputMulti)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

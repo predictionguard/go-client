@@ -15,6 +15,30 @@ curl-chat:
      -H "Content-Type: application/json" \
      -d '{ \
 		"model": "Neural-Chat-7B", \
+		"messages": "How do you feel about the world in general", \
+		"max_tokens": 1000, \
+		"temperature": 1.1, \
+		"top_p": 0.1, \
+		"top_k": 50, \
+		"output": { \
+			"factuality": true, \
+			"toxicity": true \
+		}, \
+		"input": { \
+			"pii": "replace", \
+			"pii_replace_method": "random" \
+		} \
+	}'
+
+go-chat:
+	go run examples/chat/basic/main.go
+
+curl-chat-multi:
+	curl -i -X POST https://api.predictionguard.com/chat/completions \
+     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"model": "Neural-Chat-7B", \
 		"messages": [ \
 			{ \
 			"role": "user", \
@@ -35,8 +59,8 @@ curl-chat:
 		} \
 	}'
 
-go-chat:
-	go run examples/chat/basic/main.go
+go-chat-multi:
+	go run examples/chat/multi/main.go
 
 curl-chat-sse:
 	curl -i -X POST https://api.predictionguard.com/chat/completions \
