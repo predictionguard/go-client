@@ -34,7 +34,52 @@ func Test_Client(t *testing.T) {
 func chatTests(srv *service) []table {
 	table := []table{
 		{
-			Name: "basic",
+			Name: "basic-multi",
+			ExpResp: client.Chat{
+				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
+				Object:  "chat_completion",
+				Created: client.ToTime(1715628729),
+				Model:   "Neural-Chat-7B",
+				Choices: []client.ChatChoice{
+					{
+						Index: 0,
+						Message: client.ChatMessage{
+							Role:    client.Roles.Assistant,
+							Content: "The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.",
+						},
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := client.ChatInputMulti{
+					Model: "Neural-Chat-7B",
+					Messages: []client.ChatInputMessage{
+						{
+							Role:    client.Roles.User,
+							Content: "How do you feel about the world in general",
+						},
+					},
+					MaxTokens:   client.Ptr(1000),
+					Temperature: client.Ptr[float32](0.1),
+					TopP:        client.Ptr(0.1),
+				}
+
+				resp, err := srv.Client.Chat(ctx, input)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name: "basic-string",
 			ExpResp: client.Chat{
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
 				Object:  "chat_completion",
@@ -55,13 +100,8 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatInput{
-					Model: "Neural-Chat-7B",
-					Messages: []client.ChatInputMessage{
-						{
-							Role:    client.Roles.User,
-							Content: "How do you feel about the world in general",
-						},
-					},
+					Model:       "Neural-Chat-7B",
+					Message:     "How do you feel about the world in general",
 					MaxTokens:   client.Ptr(1000),
 					Temperature: client.Ptr[float32](0.1),
 					TopP:        client.Ptr(0.1),
@@ -977,6 +1017,27 @@ func ExampleClient_Chat() {
 	defer cancel()
 
 	input := client.ChatInput{
+		Model:       "Neural-Chat-7B",
+		Message:     "How do you feel about the world in general",
+		MaxTokens:   client.Ptr(1000),
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
+		Options: &client.ChatInputOptions{
+			Factuality:       true,
+			Toxicity:         true,
+			PII:              client.PIIs.Replace,
+			PIIReplaceMethod: client.ReplaceMethods.Random,
+		},
+	}
+
+	resp, err := cln.Chat(ctx, input)
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	fmt.Println(resp.Choices[0].Message.Content)
+
+	inputMulti := client.ChatInputMulti{
 		Model: "Neural-Chat-7B",
 		Messages: []client.ChatInputMessage{
 			{
@@ -995,7 +1056,7 @@ func ExampleClient_Chat() {
 		},
 	}
 
-	resp, err := cln.Chat(ctx, input)
+	resp, err = cln.Chat(ctx, inputMulti)
 	if err != nil {
 		log.Fatalln("ERROR:", err)
 	}

@@ -34,6 +34,28 @@ func run() error {
 	defer cancel()
 
 	input := client.ChatInput{
+		Model:       "Neural-Chat-7B",
+		Message:     "How do you feel about the world in general",
+		MaxTokens:   client.Ptr(1000),
+		Temperature: client.Ptr[float32](0.1),
+		TopP:        client.Ptr(0.1),
+		TopK:        client.Ptr(50),
+		Options: &client.ChatInputOptions{
+			Factuality:       true,
+			Toxicity:         true,
+			PII:              client.PIIs.Replace,
+			PIIReplaceMethod: client.ReplaceMethods.Random,
+		},
+	}
+
+	resp, err := cln.Chat(ctx, input)
+	if err != nil {
+		return fmt.Errorf("ERROR: %w", err)
+	}
+
+	fmt.Println(resp.Choices[0].Message.Content)
+
+	inputMulti := client.ChatInputMulti{
 		Model: "Neural-Chat-7B",
 		Messages: []client.ChatInputMessage{
 			{
@@ -53,7 +75,7 @@ func run() error {
 		},
 	}
 
-	resp, err := cln.Chat(ctx, input)
+	resp, err = cln.Chat(ctx, inputMulti)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

@@ -6,17 +6,6 @@ import (
 	"net/http"
 )
 
-// ChatInput represents the full potential input options for chat.
-type ChatInput struct {
-	Model       string
-	Messages    []ChatInputMessage
-	MaxTokens   *int
-	Temperature *float32
-	TopP        *float64
-	TopK        *int
-	Options     *ChatInputOptions
-}
-
 // ChatInputMessage represents a role and content related to a chat.
 type ChatInputMessage struct {
 	Role    Role
@@ -31,6 +20,34 @@ type ChatInputOptions struct {
 	PII                  PII
 	PIIReplaceMethod     ReplaceMethod
 }
+
+// ChatInputMulti represents the full potential input options for chat.
+type ChatInputMulti struct {
+	Model       string
+	Messages    []ChatInputMessage
+	MaxTokens   *int
+	Temperature *float32
+	TopP        *float64
+	TopK        *int
+	Options     *ChatInputOptions
+}
+
+// ChatInputType implements the ChatInputTypes interface.
+func (ChatInputMulti) ChatInputType() {}
+
+// ChatInput represents the full potential input options for chat.
+type ChatInput struct {
+	Model       string
+	Message     string
+	MaxTokens   *int
+	Temperature *float32
+	TopP        *float64
+	TopK        *int
+	Options     *ChatInputOptions
+}
+
+// ChatInputType implements the ChatInputTypes interface.
+func (ChatInput) ChatInputType() {}
 
 // ChatMessage represents the role of the sender and the response.
 type ChatMessage struct {
@@ -53,8 +70,14 @@ type Chat struct {
 	Choices []ChatChoice `json:"choices"`
 }
 
+// ChatInputTypes defines behavior any chat input type must implement. The
+// method doesn't need to do anything, it just needs to exist.
+type ChatInputTypes interface {
+	ChatInputType()
+}
+
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	type chatMessage struct {
@@ -72,6 +95,29 @@ func (cln *Client) Chat(ctx context.Context, input ChatInput) (Chat, error) {
 		BlockPromptInjection bool          `json:"block_prompt_injection"`
 		PII                  string        `json:"pii"`
 		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
+	}
+
+	var input ChatInputMulti
+
+	switch v := inputType.(type) {
+	case ChatInput:
+		input = ChatInputMulti{
+			Model: v.Model,
+			Messages: []ChatInputMessage{
+				{
+					Role:    Roles.User,
+					Content: v.Message,
+				},
+			},
+			MaxTokens:   v.MaxTokens,
+			Temperature: v.Temperature,
+			TopP:        v.TopP,
+			TopK:        v.TopK,
+			Options:     v.Options,
+		}
+
+	case ChatInputMulti:
+		input = v
 	}
 
 	inputs := make([]chatMessage, len(input.Messages))
