@@ -367,7 +367,7 @@ func embeddingTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Embedding{
 				ID:      "emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw",
-				Object:  "embedding.batch",
+				Object:  "list",
 				Created: client.ToTime(1717439154),
 				Model:   "bridgetower-large-itm-mlm-itc",
 				Data: []client.EmbeddingData{
@@ -923,7 +923,7 @@ func (s *service) embeddings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw","object":"embedding.batch","created":1717439154,"model":"bridgetower-large-itm-mlm-itc","data":[{"status":"success","index":0,"object":"embedding","embedding":[0.04457271471619606]}]}`
+	resp := `{"id":"emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw","object":"list","created":1717439154,"model":"bridgetower-large-itm-mlm-itc","data":[{"status":"success","index":0,"object":"embedding","embedding":[0.04457271471619606]}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
