@@ -45,7 +45,7 @@ func run() error {
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
 		TopK:        client.Ptr(50),
-		Options: &client.ChatInputOptions{
+		Options: &client.ChatInputOption{
 			Factuality:       true,
 			Toxicity:         true,
 			PII:              client.PIIs.Replace,

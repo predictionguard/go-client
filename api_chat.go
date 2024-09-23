@@ -12,8 +12,8 @@ type ChatInputMessage struct {
 	Content string
 }
 
-// ChatInputOptions represents options for post and preprocessing the input.
-type ChatInputOptions struct {
+// ChatInputOption represents options for post and preprocessing the input.
+type ChatInputOption struct {
 	Factuality           bool
 	Toxicity             bool
 	BlockPromptInjection bool
@@ -29,7 +29,7 @@ type ChatInputMulti struct {
 	Temperature *float32
 	TopP        *float64
 	TopK        *int
-	Options     *ChatInputOptions
+	Options     *ChatInputOption
 }
 
 // ChatInputType implements the ChatInputTypes interface.
@@ -43,7 +43,7 @@ type ChatInput struct {
 	Temperature *float32
 	TopP        *float64
 	TopK        *int
-	Options     *ChatInputOptions
+	Options     *ChatInputOption
 }
 
 // ChatInputType implements the ChatInputTypes interface.

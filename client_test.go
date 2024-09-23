@@ -37,7 +37,7 @@ func chatTests(srv *service) []table {
 			Name: "basic-multi",
 			ExpResp: client.Chat{
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
-				Object:  "chat_completion",
+				Object:  "chat.completion",
 				Created: client.ToTime(1715628729),
 				Model:   "Neural-Chat-7B",
 				Choices: []client.ChatChoice{
@@ -82,7 +82,7 @@ func chatTests(srv *service) []table {
 			Name: "basic-string",
 			ExpResp: client.Chat{
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
-				Object:  "chat_completion",
+				Object:  "chat.completion",
 				Created: client.ToTime(1715628729),
 				Model:   "Neural-Chat-7B",
 				Choices: []client.ChatChoice{
@@ -211,7 +211,7 @@ func chatTests(srv *service) []table {
 			Name: "vision",
 			ExpResp: client.ChatVision{
 				ID:      "chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT",
-				Object:  "chat_completion",
+				Object:  "chat.completion",
 				Created: client.ToTime(1717441090),
 				Model:   "llava-1.5-7b-hf",
 				Choices: []client.ChatVisionChoice{
@@ -288,7 +288,7 @@ func completionTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Completion{
 				ID:      "cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4",
-				Object:  "text_completion",
+				Object:  "text.completion",
 				Created: client.ToTime(1715632193),
 				Choices: []client.CompletionChoice{
 					{
@@ -367,7 +367,7 @@ func embeddingTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Embedding{
 				ID:      "emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw",
-				Object:  "embedding_batch",
+				Object:  "embedding.batch",
 				Created: client.ToTime(1717439154),
 				Model:   "bridgetower-large-itm-mlm-itc",
 				Data: []client.EmbeddingData{
@@ -413,7 +413,7 @@ func factualityTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Factuality{
 				ID:      "fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R",
-				Object:  "factuality_check",
+				Object:  "factuality.check",
 				Created: client.ToTime(1715730425),
 				Checks: []client.FactualityCheck{
 					{
@@ -611,7 +611,7 @@ func toxicityTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Toxicity{
 				ID:      "toxi-vRvkxJHmAiSh3NvuuSc48HQ669g7y",
-				Object:  "toxicity_check",
+				Object:  "toxicity.check",
 				Created: client.ToTime(1715731131),
 				Checks: []client.ToxicityCheck{
 					{
@@ -867,10 +867,10 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 	var resp string
 	switch body.Model {
 	case "llava-1.5-7b-hf":
-		resp = `{"id":"chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT","object":"chat_completion","created":1717441090,"model":"llava-1.5-7b-hf","choices":[{"index":0,"message":{"role":"assistant","content":"No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.","output":null},"status":"success"}]}`
+		resp = `{"id":"chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT","object":"chat.completion","created":1717441090,"model":"llava-1.5-7b-hf","choices":[{"index":0,"message":{"role":"assistant","content":"No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.","output":null},"status":"success"}]}`
 
 	default:
-		resp = `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat_completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
+		resp = `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat.completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -910,7 +910,7 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text_completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"Neural-Chat-7B"}]}`
+	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text.completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"Neural-Chat-7B"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -923,7 +923,7 @@ func (s *service) embeddings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw","object":"embedding_batch","created":1717439154,"model":"bridgetower-large-itm-mlm-itc","data":[{"status":"success","index":0,"object":"embedding","embedding":[0.04457271471619606]}]}`
+	resp := `{"id":"emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw","object":"embedding.batch","created":1717439154,"model":"bridgetower-large-itm-mlm-itc","data":[{"status":"success","index":0,"object":"embedding","embedding":[0.04457271471619606]}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -936,7 +936,7 @@ func (s *service) factuality(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"checks":[{"score":0.7879658937454224,"index":0,"status":"success"}],"created":1715730425,"id":"fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R","object":"factuality_check"}`
+	resp := `{"checks":[{"score":0.7879658937454224,"index":0,"status":"success"}],"created":1715730425,"id":"fact-GK9kueuMw0NQLc0sYEIVlkGsPH31R","object":"factuality.check"}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -975,7 +975,7 @@ func (s *service) toxicity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"checks":[{"score":0.7072361707687378,"index":0,"status":"success"}],"created":1715731131,"id":"toxi-vRvkxJHmAiSh3NvuuSc48HQ669g7y","object":"toxicity_check"}`
+	resp := `{"checks":[{"score":0.7072361707687378,"index":0,"status":"success"}],"created":1715731131,"id":"toxi-vRvkxJHmAiSh3NvuuSc48HQ669g7y","object":"toxicity.check"}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -1022,7 +1022,7 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOptions{
+		Options: &client.ChatInputOption{
 			Factuality:       true,
 			Toxicity:         true,
 			PII:              client.PIIs.Replace,
@@ -1048,7 +1048,7 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOptions{
+		Options: &client.ChatInputOption{
 			Factuality:       true,
 			Toxicity:         true,
 			PII:              client.PIIs.Replace,
