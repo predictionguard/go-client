@@ -1022,7 +1022,7 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOption{
+		Options: &client.ChatInputOptions{
 			Factuality:       true,
 			Toxicity:         true,
 			PII:              client.PIIs.Replace,
@@ -1048,7 +1048,7 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOption{
+		Options: &client.ChatInputOptions{
 			Factuality:       true,
 			Toxicity:         true,
 			PII:              client.PIIs.Replace,
