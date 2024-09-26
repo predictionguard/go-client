@@ -1022,11 +1022,13 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOptions{
-			Factuality:       true,
-			Toxicity:         true,
+		InputExtension: &client.InputExtension{
 			PII:              client.PIIs.Replace,
 			PIIReplaceMethod: client.ReplaceMethods.Random,
+		},
+		OutputExtension: &client.OutputExtension{
+			Factuality: true,
+			Toxicity:   true,
 		},
 	}
 
@@ -1048,11 +1050,13 @@ func ExampleClient_Chat() {
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
-		Options: &client.ChatInputOptions{
-			Factuality:       true,
-			Toxicity:         true,
+		InputExtension: &client.InputExtension{
 			PII:              client.PIIs.Replace,
 			PIIReplaceMethod: client.ReplaceMethods.Random,
+		},
+		OutputExtension: &client.OutputExtension{
+			Factuality: true,
+			Toxicity:   true,
 		},
 	}
 

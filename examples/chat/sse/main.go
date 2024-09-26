@@ -45,6 +45,10 @@ func run() error {
 		Temperature: client.Ptr[float32](0.1),
 		TopP:        client.Ptr(0.1),
 		TopK:        client.Ptr(50),
+		InputExtension: &client.InputExtension{
+			PII:              client.PIIs.Replace,
+			PIIReplaceMethod: client.ReplaceMethods.Random,
+		},
 	}
 
 	ch := make(chan client.ChatSSE, 100)

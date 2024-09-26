@@ -78,7 +78,11 @@ curl-chat-sse:
 		"max_tokens": 300, \
 		"temperature": 0.1, \
 		"top_p": 0.1, \
-		"top_k": 50 \
+		"top_k": 50, \
+		"input": { \
+			"pii": "replace", \
+			"pii_replace_method": "random" \
+		} \
 	}'
 
 go-chat-sse:
@@ -127,15 +131,23 @@ curl-comp:
      -H "Content-Type: application/json" \
      -d '{ \
 		"model": "Neural-Chat-7B", \
-		"prompt": "Will I lose my hair", \
+		"prompt": "Will I lose my hair by the time I am 64?", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
 		"top_p": 0.1, \
-		"top_k": 50 \
+		"top_k": 50, \
+		"output": { \
+			"factuality": true, \
+			"toxicity": true \
+		}, \
+		"input": { \
+			"pii": "replace", \
+			"pii_replace_method": "random" \
+		} \
 	}'
 
 go-comp:
-	go run examples/completions/main.go
+	go run examples/completion/main.go
 
 curl-embed:
 	curl -i -X POST https://api.predictionguard.com/embeddings \

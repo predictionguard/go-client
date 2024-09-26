@@ -6,30 +6,38 @@ import (
 	"net/http"
 )
 
+// InputExtension represents options for pre-processing.
+type InputExtension struct {
+	BlockPromptInjection bool
+	PII                  PII
+	PIIReplaceMethod     ReplaceMethod
+}
+
+// OutputExtension represents options for post-processing.
+type OutputExtension struct {
+	Factuality bool
+	Toxicity   bool
+}
+
+// =============================================================================
+// Basic Chat Completions
+
 // ChatInputMessage represents a role and content related to a chat.
 type ChatInputMessage struct {
 	Role    Role
 	Content string
 }
 
-// ChatInputOptions represents options for post and preprocessing the input.
-type ChatInputOptions struct {
-	Factuality           bool
-	Toxicity             bool
-	BlockPromptInjection bool
-	PII                  PII
-	PIIReplaceMethod     ReplaceMethod
-}
-
 // ChatInputMulti represents the full potential input options for chat.
 type ChatInputMulti struct {
-	Model       string
-	Messages    []ChatInputMessage
-	MaxTokens   *int
-	Temperature *float32
-	TopP        *float64
-	TopK        *int
-	Options     *ChatInputOptions
+	Model           string
+	Messages        []ChatInputMessage
+	MaxTokens       *int
+	Temperature     *float32
+	TopP            *float64
+	TopK            *int
+	InputExtension  *InputExtension
+	OutputExtension *OutputExtension
 }
 
 // ChatInputType implements the ChatInputTypes interface.
@@ -37,13 +45,14 @@ func (ChatInputMulti) ChatInputType() {}
 
 // ChatInput represents the full potential input options for chat.
 type ChatInput struct {
-	Model       string
-	Message     string
-	MaxTokens   *int
-	Temperature *float32
-	TopP        *float64
-	TopK        *int
-	Options     *ChatInputOptions
+	Model           string
+	Message         string
+	MaxTokens       *int
+	Temperature     *float32
+	TopP            *float64
+	TopK            *int
+	InputExtension  *InputExtension
+	OutputExtension *OutputExtension
 }
 
 // ChatInputType implements the ChatInputTypes interface.
@@ -80,22 +89,26 @@ type ChatInputTypes interface {
 func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
+	// -------------------------------------------------------------------------
+
 	type chatMessage struct {
 		Role    Role   `json:"role"`
 		Content string `json:"content"`
 		Output  string `json:"output"`
 	}
 
-	type chatOutputOption struct {
-		Factuality bool `json:"factuality"`
-		Toxicity   bool `json:"toxicity"`
-	}
-
-	type chatInputOption struct {
+	type inputExtension struct {
 		BlockPromptInjection bool          `json:"block_prompt_injection"`
 		PII                  string        `json:"pii"`
 		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
 	}
+
+	type outputExtension struct {
+		Factuality bool `json:"factuality"`
+		Toxicity   bool `json:"toxicity"`
+	}
+
+	// -------------------------------------------------------------------------
 
 	var input ChatInputMulti
 
@@ -109,16 +122,19 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 					Content: v.Message,
 				},
 			},
-			MaxTokens:   v.MaxTokens,
-			Temperature: v.Temperature,
-			TopP:        v.TopP,
-			TopK:        v.TopK,
-			Options:     v.Options,
+			MaxTokens:       v.MaxTokens,
+			Temperature:     v.Temperature,
+			TopP:            v.TopP,
+			TopK:            v.TopK,
+			InputExtension:  v.InputExtension,
+			OutputExtension: v.OutputExtension,
 		}
 
 	case ChatInputMulti:
 		input = v
 	}
+
+	// -------------------------------------------------------------------------
 
 	inputs := make([]chatMessage, len(input.Messages))
 	for i, inp := range input.Messages {
@@ -129,14 +145,14 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 	}
 
 	body := struct {
-		Model       string            `json:"model"`
-		Messages    []chatMessage     `json:"messages"`
-		MaxTokens   *int              `json:"max_tokens,omitempty"`
-		Temperature *float32          `json:"temperature,omitempty"`
-		TopP        *float64          `json:"top_p,omitempty"`
-		TopK        *int              `json:"top_k,omitempty"`
-		Output      *chatOutputOption `json:"output,omitempty"`
-		Input       *chatInputOption  `json:"input,omitempty"`
+		Model           string           `json:"model"`
+		Messages        []chatMessage    `json:"messages"`
+		MaxTokens       *int             `json:"max_tokens,omitempty"`
+		Temperature     *float32         `json:"temperature,omitempty"`
+		TopP            *float64         `json:"top_p,omitempty"`
+		TopK            *int             `json:"top_k,omitempty"`
+		InputExtension  *inputExtension  `json:"input,omitempty"`
+		OutputExtension *outputExtension `json:"output,omitempty"`
 	}{
 		Model:       input.Model,
 		Messages:    inputs,
@@ -146,22 +162,28 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 		TopK:        input.TopK,
 	}
 
-	if input.Options != nil {
-		if input.Options.Factuality || input.Options.Toxicity {
-			body.Output = &chatOutputOption{
-				Factuality: input.Options.Factuality,
-				Toxicity:   input.Options.Toxicity,
-			}
-		}
+	// -------------------------------------------------------------------------
 
-		if (input.Options.BlockPromptInjection || input.Options.PII != PII{} || input.Options.PIIReplaceMethod != ReplaceMethod{}) {
-			body.Input = &chatInputOption{
-				BlockPromptInjection: input.Options.BlockPromptInjection,
-				PII:                  input.Options.PII.name,
-				PIIReplaceMethod:     input.Options.PIIReplaceMethod,
+	if input.InputExtension != nil {
+		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
+			body.InputExtension = &inputExtension{
+				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
+				PII:                  input.InputExtension.PII.name,
+				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
 			}
 		}
 	}
+
+	if input.OutputExtension != nil {
+		if input.OutputExtension.Factuality || input.OutputExtension.Toxicity {
+			body.OutputExtension = &outputExtension{
+				Factuality: input.OutputExtension.Factuality,
+				Toxicity:   input.OutputExtension.Toxicity,
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
 
 	var resp Chat
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
@@ -172,15 +194,17 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 }
 
 // =============================================================================
+// Streaming Chat Completions
 
 // ChatSSEInput represents the full potential input options for SSE chat.
 type ChatSSEInput struct {
-	Model       string
-	Messages    []ChatInputMessage
-	MaxTokens   *int
-	Temperature *float32
-	TopP        *float64
-	TopK        *int
+	Model          string
+	Messages       []ChatInputMessage
+	MaxTokens      *int
+	Temperature    *float32
+	TopP           *float64
+	TopK           *int
+	InputExtension *InputExtension
 }
 
 // ChatSSEDelta represents content for the sse call.
@@ -210,11 +234,21 @@ type ChatSSE struct {
 func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan ChatSSE) error {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
+	// -------------------------------------------------------------------------
+
 	type chatInput struct {
 		Role    Role   `json:"role"`
 		Content string `json:"content"`
 		Output  string `json:"output"`
 	}
+
+	type inputExtension struct {
+		BlockPromptInjection bool          `json:"block_prompt_injection"`
+		PII                  string        `json:"pii"`
+		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
+	}
+
+	// -------------------------------------------------------------------------
 
 	messages := make([]chatInput, len(input.Messages))
 	for i, inp := range input.Messages {
@@ -225,13 +259,14 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 	}
 
 	body := struct {
-		Model       string      `json:"model"`
-		Messages    []chatInput `json:"messages"`
-		MaxTokens   *int        `json:"max_tokens,omitempty"`
-		Temperature *float32    `json:"temperature,omitempty"`
-		TopP        *float64    `json:"top_p,omitempty"`
-		TopK        *int        `json:"top_k,omitempty"`
-		Stream      bool        `json:"stream"`
+		Model          string          `json:"model"`
+		Messages       []chatInput     `json:"messages"`
+		MaxTokens      *int            `json:"max_tokens,omitempty"`
+		Temperature    *float32        `json:"temperature,omitempty"`
+		TopP           *float64        `json:"top_p,omitempty"`
+		TopK           *int            `json:"top_k,omitempty"`
+		Stream         bool            `json:"stream"`
+		InputExtension *inputExtension `json:"input,omitempty"`
 	}{
 		Model:       input.Model,
 		Messages:    messages,
@@ -242,8 +277,21 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		Stream:      true,
 	}
 
-	sse := newSSEClient[ChatSSE](cln)
+	// -------------------------------------------------------------------------
 
+	if input.InputExtension != nil {
+		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
+			body.InputExtension = &inputExtension{
+				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
+				PII:                  input.InputExtension.PII.name,
+				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
+
+	sse := newSSEClient[ChatSSE](cln)
 	if err := sse.do(ctx, http.MethodPost, url, body, ch); err != nil {
 		return err
 	}
@@ -252,17 +300,20 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 }
 
 // =============================================================================
+// Vision Chat Completions
 
 // ChatVisionInput represents the full potential input options for vision chat.
 type ChatVisionInput struct {
-	Model       string
-	Role        Role
-	Question    string
-	Image       Base64Encoder
-	MaxTokens   int
-	Temperature *float32
-	TopP        *float64
-	TopK        *int
+	Model           string
+	Role            Role
+	Question        string
+	Image           Base64Encoder
+	MaxTokens       int
+	Temperature     *float32
+	TopP            *float64
+	TopK            *int
+	InputExtension  *InputExtension
+	OutputExtension *OutputExtension
 }
 
 // ChatVisionMessage represents content for the vision call.
@@ -295,6 +346,19 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		return ChatVision{}, fmt.Errorf("base64: %w", err)
 	}
 
+	// -------------------------------------------------------------------------
+
+	type inputExtension struct {
+		BlockPromptInjection bool          `json:"block_prompt_injection"`
+		PII                  string        `json:"pii"`
+		PIIReplaceMethod     ReplaceMethod `json:"pii_replace_method"`
+	}
+
+	type outputExtension struct {
+		Factuality bool `json:"factuality"`
+		Toxicity   bool `json:"toxicity"`
+	}
+
 	type content struct {
 		Type     string `json:"type"`
 		Text     string `json:"text,omitempty"`
@@ -308,13 +372,17 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		Content []content `json:"content"`
 	}
 
+	// -------------------------------------------------------------------------
+
 	body := struct {
-		Model       string    `json:"model"`
-		Messages    []message `json:"messages"`
-		MaxTokens   int       `json:"max_tokens"`
-		Temperature *float32  `json:"temperature,omitempty"`
-		TopP        *float64  `json:"top_p,omitempty"`
-		TopK        *int      `json:"top_k,omitempty"`
+		Model           string           `json:"model"`
+		Messages        []message        `json:"messages"`
+		MaxTokens       int              `json:"max_tokens"`
+		Temperature     *float32         `json:"temperature,omitempty"`
+		TopP            *float64         `json:"top_p,omitempty"`
+		TopK            *int             `json:"top_k,omitempty"`
+		InputExtension  *inputExtension  `json:"input,omitempty"`
+		OutputExtension *outputExtension `json:"output,omitempty"`
 	}{
 		Model: input.Model,
 		Messages: []message{
@@ -341,6 +409,29 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		TopP:        input.TopP,
 		TopK:        input.TopK,
 	}
+
+	// -------------------------------------------------------------------------
+
+	if input.InputExtension != nil {
+		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
+			body.InputExtension = &inputExtension{
+				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
+				PII:                  input.InputExtension.PII.name,
+				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
+			}
+		}
+	}
+
+	if input.OutputExtension != nil {
+		if input.OutputExtension.Factuality || input.OutputExtension.Toxicity {
+			body.OutputExtension = &outputExtension{
+				Factuality: input.OutputExtension.Factuality,
+				Toxicity:   input.OutputExtension.Toxicity,
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
 
 	var resp ChatVision
 	if err := cln.do(ctx, http.MethodPost, url, body, &resp); err != nil {
