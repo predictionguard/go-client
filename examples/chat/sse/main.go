@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -59,6 +60,10 @@ func run() error {
 	}
 
 	for resp := range ch {
+		if resp.Error != "" {
+			return errors.New(resp.Error)
+		}
+
 		for _, choice := range resp.Choices {
 			fmt.Print(choice.Delta.Content)
 		}

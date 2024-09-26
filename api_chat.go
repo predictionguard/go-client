@@ -228,6 +228,7 @@ type ChatSSE struct {
 	Created Time            `json:"created"`
 	Model   string          `json:"model"`
 	Choices []ChatSSEChoice `json:"choices"`
+	Error   string          `json:"error"`
 }
 
 // ChatSSE generate chat completions based on a conversation history.
