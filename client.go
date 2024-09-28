@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v0.28.1"
+const version = "v0.28.2"
 
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
@@ -144,8 +144,8 @@ func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string,
 			select {
 			case ch <- v:
 
-			case err := <-ctx.Done():
-				cln.log(ctx, "sseclient: rawRequest:", "Context", err)
+			case <-ctx.Done():
+				cln.log(ctx, "sseclient: rawRequest:", "Context", err.Error())
 				return
 			}
 		}
