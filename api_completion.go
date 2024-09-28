@@ -75,7 +75,7 @@ func (cln *Client) Completions(ctx context.Context, input CompletionInput) (Comp
 		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
 			body.InputExtension = &inputExtension{
 				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
-				PII:                  input.InputExtension.PII.name,
+				PII:                  input.InputExtension.PII.value,
 				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
 			}
 		}

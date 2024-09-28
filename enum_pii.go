@@ -41,7 +41,7 @@ var piis = make(map[string]PII)
 
 // PII represents a PII in the system.
 type PII struct {
-	name string
+	value string
 }
 
 func newPII(pii string) PII {
@@ -52,7 +52,7 @@ func newPII(pii string) PII {
 
 // String returns the name of the PII.
 func (p PII) String() string {
-	return p.name
+	return p.value
 }
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
@@ -62,16 +62,16 @@ func (p *PII) UnmarshalText(data []byte) error {
 		return err
 	}
 
-	p.name = pii.name
+	p.value = pii.value
 	return nil
 }
 
 // MarshalText implement the marshal interface for JSON conversions.
 func (p PII) MarshalText() ([]byte, error) {
-	return []byte(p.name), nil
+	return []byte(p.value), nil
 }
 
 // Equal provides support for the go-cmp package and testing.
 func (p PII) Equal(p2 PII) bool {
-	return p.name == p2.name
+	return p.value == p2.value
 }

@@ -21,6 +21,7 @@ func Test_Client(t *testing.T) {
 	service := newService(t)
 	defer service.Teardown()
 
+	runTests(t, capabilityTests(service), "capability")
 	runTests(t, chatTests(service), "chat")
 	runTests(t, completionTests(service), "completion")
 	runTests(t, embeddingTests(service), "embedding")
@@ -29,6 +30,68 @@ func Test_Client(t *testing.T) {
 	runTests(t, ReplacePIITests(service), "ReplacePII")
 	runTests(t, toxicityTests(service), "toxicity")
 	runTests(t, translateTests(service), "translate")
+}
+
+func capabilityTests(srv *service) []table {
+	table := []table{
+		{
+			Name: "basic",
+			ExpResp: []string{
+				"Hermes-2-Pro-Mistral-7B",
+				"Neural-Chat-7B",
+				"llama-3-sqlcoder-8b",
+				"deepseek-coder-6.7b-instruct",
+				"Hermes-2-Pro-Llama-3-8B",
+				"llava-1.5-7b-hf",
+				"Hermes-3-Llama-3.1-8B",
+				"Hermes-3-Llama-3.1-70B",
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.Client.Capability(ctx, client.Capabilities.ChatCompletion)
+				if err != nil {
+					return fmt.Errorf("ERROR: %w", err)
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Capability(ctx, client.Capabilities.ChatCompletion)
+				if err != nil {
+					return fmt.Errorf("ERROR: %w", err)
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
+	}
+
+	return table
 }
 
 func chatTests(srv *service) []table {
@@ -831,16 +894,30 @@ func newService(t *testing.T) *service {
 		server: srv,
 	}
 
-	mux.HandleFunc("/chat/completions", s.chat)
-	mux.HandleFunc("/completions", s.completion)
-	mux.HandleFunc("/factuality", s.factuality)
-	mux.HandleFunc("/embeddings", s.embeddings)
-	mux.HandleFunc("/injection", s.injection)
-	mux.HandleFunc("/PII", s.ReplacePII)
-	mux.HandleFunc("/toxicity", s.toxicity)
-	mux.HandleFunc("/translate", s.translate)
+	mux.HandleFunc("GET /chat/completions", s.capability)
+	mux.HandleFunc("POST /chat/completions", s.chat)
+	mux.HandleFunc("POST /completions", s.completion)
+	mux.HandleFunc("POST /factuality", s.factuality)
+	mux.HandleFunc("POST /embeddings", s.embeddings)
+	mux.HandleFunc("POST /injection", s.injection)
+	mux.HandleFunc("POST /PII", s.ReplacePII)
+	mux.HandleFunc("POST /toxicity", s.toxicity)
+	mux.HandleFunc("POST /translate", s.translate)
 
 	return &s
+}
+
+func (s *service) capability(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	resp := `["Hermes-2-Pro-Mistral-7B","Neural-Chat-7B","llama-3-sqlcoder-8b","deepseek-coder-6.7b-instruct","Hermes-2-Pro-Llama-3-8B","llava-1.5-7b-hf","Hermes-3-Llama-3.1-8B","Hermes-3-Llama-3.1-70B"]`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
 }
 
 func (s *service) chat(w http.ResponseWriter, r *http.Request) {
@@ -996,6 +1073,33 @@ func (s *service) translate(w http.ResponseWriter, r *http.Request) {
 }
 
 // =============================================================================
+
+func ExampleClient_Capability() {
+	// examples/capability/main.go
+
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+
+	logger := func(ctx context.Context, msg string, v ...any) {
+		s := fmt.Sprintf("msg: %s", msg)
+		for i := 0; i < len(v); i = i + 2 {
+			s = s + fmt.Sprintf(", %s: %v", v[i], v[i+1])
+		}
+		log.Println(s)
+	}
+
+	cln := client.New(logger, host, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resp, err := cln.Capability(ctx, client.Capabilities.ChatCompletion)
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	fmt.Println(resp)
+}
 
 func ExampleClient_Chat() {
 	// examples/chat/basic/main.go

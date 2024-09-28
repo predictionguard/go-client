@@ -45,7 +45,7 @@ var replaceMethods = make(map[string]ReplaceMethod)
 
 // ReplaceMethod represents a replace method in the system.
 type ReplaceMethod struct {
-	name string
+	value string
 }
 
 func newReplaceMethod(replaceMethod string) ReplaceMethod {
@@ -56,7 +56,7 @@ func newReplaceMethod(replaceMethod string) ReplaceMethod {
 
 // String returns the name of the replace method.
 func (rm ReplaceMethod) String() string {
-	return rm.name
+	return rm.value
 }
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
@@ -66,16 +66,16 @@ func (rm *ReplaceMethod) UnmarshalText(data []byte) error {
 		return err
 	}
 
-	rm.name = replaceMethod.name
+	rm.value = replaceMethod.value
 	return nil
 }
 
 // MarshalText implement the marshal interface for JSON conversions.
 func (rm ReplaceMethod) MarshalText() ([]byte, error) {
-	return []byte(rm.name), nil
+	return []byte(rm.value), nil
 }
 
 // Equal provides support for the go-cmp package and testing.
 func (rm ReplaceMethod) Equal(rm2 ReplaceMethod) bool {
-	return rm.name == rm2.name
+	return rm.value == rm2.value
 }

@@ -168,7 +168,7 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
 			body.InputExtension = &inputExtension{
 				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
-				PII:                  input.InputExtension.PII.name,
+				PII:                  input.InputExtension.PII.value,
 				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
 			}
 		}
@@ -284,7 +284,7 @@ func (cln *Client) ChatSSE(ctx context.Context, input ChatSSEInput, ch chan Chat
 		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
 			body.InputExtension = &inputExtension{
 				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
-				PII:                  input.InputExtension.PII.name,
+				PII:                  input.InputExtension.PII.value,
 				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
 			}
 		}
@@ -417,7 +417,7 @@ func (cln *Client) ChatVision(ctx context.Context, input ChatVisionInput) (ChatV
 		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
 			body.InputExtension = &inputExtension{
 				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
-				PII:                  input.InputExtension.PII.name,
+				PII:                  input.InputExtension.PII.value,
 				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
 			}
 		}

@@ -179,7 +179,7 @@ var languages = make(map[string]Language)
 
 // Language represents a language in the system.
 type Language struct {
-	code string
+	value string
 }
 
 func newLanguage(code string) Language {
@@ -190,7 +190,7 @@ func newLanguage(code string) Language {
 
 // String returns the ISO-639 code of the language.
 func (l Language) String() string {
-	return l.code
+	return l.value
 }
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
@@ -200,16 +200,16 @@ func (l *Language) UnmarshalText(data []byte) error {
 		return err
 	}
 
-	l.code = lang.code
+	l.value = lang.value
 	return nil
 }
 
 // MarshalText implement the marshal interface for JSON conversions.
 func (l Language) MarshalText() ([]byte, error) {
-	return []byte(l.code), nil
+	return []byte(l.value), nil
 }
 
 // Equal provides support for the go-cmp package and testing.
 func (l Language) Equal(l2 Language) bool {
-	return l.code == l2.code
+	return l.value == l2.value
 }

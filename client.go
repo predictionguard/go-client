@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v0.27.0"
+const version = "v0.28.0"
 
 // ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
