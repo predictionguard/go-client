@@ -38,7 +38,7 @@ func capabilityTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: []string{
 				"Hermes-2-Pro-Mistral-7B",
-				"Neural-Chat-7B",
+				"neural-chat-7b-v3-3",
 				"llama-3-sqlcoder-8b",
 				"deepseek-coder-6.7b-instruct",
 				"Hermes-2-Pro-Llama-3-8B",
@@ -102,7 +102,7 @@ func chatTests(srv *service) []table {
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
 				Object:  "chat.completion",
 				Created: client.ToTime(1715628729),
-				Model:   "Neural-Chat-7B",
+				Model:   "neural-chat-7b-v3-3",
 				Choices: []client.ChatChoice{
 					{
 						Index: 0,
@@ -118,7 +118,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatInputMulti{
-					Model: "Neural-Chat-7B",
+					Model: "neural-chat-7b-v3-3",
 					Messages: []client.ChatInputMessage{
 						{
 							Role:    client.Roles.User,
@@ -147,7 +147,7 @@ func chatTests(srv *service) []table {
 				ID:      "chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9",
 				Object:  "chat.completion",
 				Created: client.ToTime(1715628729),
-				Model:   "Neural-Chat-7B",
+				Model:   "neural-chat-7b-v3-3",
 				Choices: []client.ChatChoice{
 					{
 						Index: 0,
@@ -163,7 +163,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatInput{
-					Model:       "Neural-Chat-7B",
+					Model:       "neural-chat-7b-v3-3",
 					Message:     "How do you feel about the world in general",
 					MaxTokens:   client.Ptr(1000),
 					Temperature: client.Ptr[float32](0.1),
@@ -188,7 +188,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734993),
-					Model:   "Neural-Chat-7B",
+					Model:   "neural-chat-7b-v3-3",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -205,7 +205,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-afH2BnyvKPvon2r16DkUWJygbvePY",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734993),
-					Model:   "Neural-Chat-7B",
+					Model:   "neural-chat-7b-v3-3",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -222,7 +222,7 @@ func chatTests(srv *service) []table {
 					ID:      "chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb",
 					Object:  "chat.completion.chunk",
 					Created: client.ToTime(1715734995),
-					Model:   "Neural-Chat-7B",
+					Model:   "neural-chat-7b-v3-3",
 					Choices: []client.ChatSSEChoice{
 						{
 							Index: 0,
@@ -241,7 +241,7 @@ func chatTests(srv *service) []table {
 				defer cancel()
 
 				input := client.ChatSSEInput{
-					Model: "Neural-Chat-7B",
+					Model: "neural-chat-7b-v3-3",
 					Messages: []client.ChatInputMessage{
 						{
 							Role:    client.Roles.User,
@@ -365,7 +365,7 @@ func completionTests(srv *service) []table {
 				defer cancel()
 
 				input := client.CompletionInput{
-					Model:       "Neural-Chat-7B",
+					Model:       "neural-chat-7b-v3-3",
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
 					Temperature: client.Ptr[float32](0.1),
@@ -391,7 +391,7 @@ func completionTests(srv *service) []table {
 				defer cancel()
 
 				input := client.CompletionInput{
-					Model:       "Neural-Chat-7B",
+					Model:       "neural-chat-7b-v3-3",
 					Prompt:      "Will I lose my hair",
 					MaxTokens:   1000,
 					Temperature: client.Ptr[float32](0.1),
@@ -913,7 +913,7 @@ func (s *service) capability(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `["Hermes-2-Pro-Mistral-7B","Neural-Chat-7B","llama-3-sqlcoder-8b","deepseek-coder-6.7b-instruct","Hermes-2-Pro-Llama-3-8B","llava-1.5-7b-hf","Hermes-3-Llama-3.1-8B","Hermes-3-Llama-3.1-70B"]`
+	resp := `["Hermes-2-Pro-Mistral-7B","neural-chat-7b-v3-3","llama-3-sqlcoder-8b","deepseek-coder-6.7b-instruct","Hermes-2-Pro-Llama-3-8B","llava-1.5-7b-hf","Hermes-3-Llama-3.1-8B","Hermes-3-Llama-3.1-70B"]`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -947,7 +947,7 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 		resp = `{"id":"chat-1qKp6k5y1I4McppJvyHqNkaTeJUtT","object":"chat.completion","created":1717441090,"model":"llava-1.5-7b-hf","choices":[{"index":0,"message":{"role":"assistant","content":"No, there is no deer in this picture. The image features a man wearing a hat and glasses, smiling for the camera.","output":null},"status":"success"}]}`
 
 	default:
-		resp = `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat.completion","created":1715628729,"model":"Neural-Chat-7B","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
+		resp = `{"id":"chat-ShL1yk0N0h1lzmrJDQCpCz3WQFQh9","object":"chat.completion","created":1715628729,"model":"neural-chat-7b-v3-3","choices":[{"index":0,"message":{"role":"assistant","content":"The world, in general, is full of both beauty and challenges. It can be considered as a mixed bag with various aspects to explore, understand, and appreciate. There are countless achievements in terms of scientific advancements, medical breakthroughs, and technological innovations. On the other hand, the world often encounters issues related to inequality, conflicts, environmental degradation, and moral complexities.\n\nPersonally, it's essential to maintain a balance and perspective while navigating these dimensions. It means trying to find the silver lining behind every storm, practicing gratitude, and embracing empathy to connect with and help others. Actively participating in making the world a better place by supporting causes close to one's heart can also provide a sense of purpose and hope.","output":null},"status":"success"}]}`
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -957,9 +957,9 @@ func (s *service) chat(w http.ResponseWriter, r *http.Request) {
 
 func (s *service) chatSSE(w http.ResponseWriter) {
 	events := []string{
-		`data: {"id":"chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe","object":"chat.completion.chunk","created":1715734993,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{"content":" I"},"generated_text":null,"logprobs":0,"finish_reason":null}]}`,
-		`data: {"id":"chat-afH2BnyvKPvon2r16DkUWJygbvePY","object":"chat.completion.chunk","created":1715734993,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{"content":" believe"},"generated_text":null,"logprobs":-0.8534317,"finish_reason":null}]}`,
-		`data: {"id":"chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb","object":"chat.completion.chunk","created":1715734995,"model":"Neural-Chat-7B","choices":[{"index":0,"delta":{},"generated_text":"I believe","logprobs":0,"finish_reason":"stop"}]}`,
+		`data: {"id":"chat-OoNijY7ZAkVt4t5Zu8nVDHlW8RAJe","object":"chat.completion.chunk","created":1715734993,"model":"neural-chat-7b-v3-3","choices":[{"index":0,"delta":{"content":" I"},"generated_text":null,"logprobs":0,"finish_reason":null}]}`,
+		`data: {"id":"chat-afH2BnyvKPvon2r16DkUWJygbvePY","object":"chat.completion.chunk","created":1715734993,"model":"neural-chat-7b-v3-3","choices":[{"index":0,"delta":{"content":" believe"},"generated_text":null,"logprobs":-0.8534317,"finish_reason":null}]}`,
+		`data: {"id":"chat-Dd6xpFh5TOtLtFeSxALbmfNNGiyvb","object":"chat.completion.chunk","created":1715734995,"model":"neural-chat-7b-v3-3","choices":[{"index":0,"delta":{},"generated_text":"I believe","logprobs":0,"finish_reason":"stop"}]}`,
 		`data: [DONE]`,
 	}
 
@@ -987,7 +987,7 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text.completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"Neural-Chat-7B"}]}`
+	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text.completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"neural-chat-7b-v3-3"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -1121,7 +1121,7 @@ func ExampleClient_Chat() {
 	defer cancel()
 
 	input := client.ChatInput{
-		Model:       "Neural-Chat-7B",
+		Model:       "neural-chat-7b-v3-3",
 		Message:     "How do you feel about the world in general",
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),
@@ -1144,7 +1144,7 @@ func ExampleClient_Chat() {
 	fmt.Println(resp.Choices[0].Message.Content)
 
 	inputMulti := client.ChatInputMulti{
-		Model: "Neural-Chat-7B",
+		Model: "neural-chat-7b-v3-3",
 		Messages: []client.ChatInputMessage{
 			{
 				Role:    client.Roles.User,
@@ -1192,7 +1192,7 @@ func ExampleClient_ChatSSE() {
 	defer cancel()
 
 	input := client.ChatSSEInput{
-		Model: "Neural-Chat-7B",
+		Model: "neural-chat-7b-v3-3",
 		Messages: []client.ChatInputMessage{
 			{
 				Role:    client.Roles.User,
@@ -1282,7 +1282,7 @@ func ExampleClient_Completions() {
 	defer cancel()
 
 	input := client.CompletionInput{
-		Model:       "Neural-Chat-7B",
+		Model:       "neural-chat-7b-v3-3",
 		Prompt:      "Will I lose my hair",
 		MaxTokens:   1000,
 		Temperature: client.Ptr[float32](0.1),

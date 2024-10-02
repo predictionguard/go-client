@@ -35,7 +35,7 @@ func run() error {
 	defer cancel()
 
 	input := client.ChatSSEInput{
-		Model: "Neural-Chat-7B",
+		Model: "neural-chat-7b-v3-3",
 		Messages: []client.ChatInputMessage{
 			{
 				Role:    client.Roles.User,

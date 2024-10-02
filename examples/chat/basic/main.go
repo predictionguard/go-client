@@ -34,7 +34,7 @@ func run() error {
 	defer cancel()
 
 	input := client.ChatInput{
-		Model:       "Neural-Chat-7B",
+		Model:       "neural-chat-7b-v3-3",
 		Message:     "How do you feel about the world in general",
 		MaxTokens:   client.Ptr(1000),
 		Temperature: client.Ptr[float32](0.1),

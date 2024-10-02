@@ -17,7 +17,7 @@ curl-chat:
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "Neural-Chat-7B", \
+		"model": "neural-chat-7b-v3-3", \
 		"messages": "How do you feel about the world in general", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
@@ -41,7 +41,7 @@ curl-chat-multi:
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "Neural-Chat-7B", \
+		"model": "neural-chat-7b-v3-3", \
 		"messages": [ \
 			{ \
 			"role": "user", \
@@ -70,7 +70,7 @@ curl-chat-sse:
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "Neural-Chat-7B", \
+		"model": "neural-chat-7b-v3-3", \
 		"messages": [ \
 			{ \
 			"role": "user", \
@@ -133,7 +133,7 @@ curl-comp:
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "Neural-Chat-7B", \
+		"model": "neural-chat-7b-v3-3", \
 		"prompt": "Will I lose my hair by the time I am 64?", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
