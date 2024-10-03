@@ -351,7 +351,7 @@ func completionTests(srv *service) []table {
 			Name: "basic",
 			ExpResp: client.Completion{
 				ID:      "cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4",
-				Object:  "text.completion",
+				Object:  "text_completion",
 				Created: client.ToTime(1715632193),
 				Choices: []client.CompletionChoice{
 					{
@@ -987,7 +987,7 @@ func (s *service) completion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text.completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"neural-chat-7b-v3-3"}]}`
+	resp := `{"id":"cmpl-3gbwD5tLJxklJAljHCjOqMyqUZvv4","object":"text_completion","created":1715632193,"choices":[{"text":"after weight loss surgery? While losing weight can improve the appearance of your hair and make it appear healthier, some people may experience temporary hair loss in the process.","index":0,"status":"success","model":"neural-chat-7b-v3-3"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

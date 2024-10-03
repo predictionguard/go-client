@@ -29,6 +29,7 @@ type Completion struct {
 	ID      string             `json:"id"`
 	Object  string             `json:"object"`
 	Created Time               `json:"created"`
+	Model   string             `json:"model"`
 	Choices []CompletionChoice `json:"choices"`
 }
 
