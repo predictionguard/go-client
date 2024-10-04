@@ -5,7 +5,7 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # Examples
 
 curl-capability:
-	curl -i -X GET https://api.predictionguard.com/chat/completions \
+	curl -i -X GET https://staging.predictionguard.com/chat/completions \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json"
 
@@ -13,12 +13,12 @@ go-capability:
 	go run examples/capability/main.go
 
 curl-chat:
-	curl -i -X POST https://api.predictionguard.com/chat/completions \
+	curl -i -X POST https://staging.predictionguard.com/chat/completions \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "neural-chat-7b-v3-3", \
-		"messages": "How do you feel about the world in general", \
+		"model": "Hermes-2-Pro-Llama-3-8B", \
+		"messages": "How do you feel about the world in general. I think the world is grand.", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
 		"top_p": 0.1, \
@@ -37,15 +37,15 @@ go-chat:
 	go run examples/chat/basic/main.go
 
 curl-chat-multi:
-	curl -i -X POST https://api.predictionguard.com/chat/completions \
+	curl -i -X POST https://staging.predictionguard.com/chat/completions \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "neural-chat-7b-v3-3", \
+		"model": "Hermes-2-Pro-Llama-3-8B", \
 		"messages": [ \
 			{ \
 			"role": "user", \
-			"content": "How do you feel about the world in general" \
+			"content": "How do you feel about the world in general. I think the world is grand." \
 			} \
 		], \
 		"max_tokens": 1000, \
@@ -66,15 +66,15 @@ go-chat-multi:
 	go run examples/chat/multi/main.go
 
 curl-chat-sse:
-	curl -i -X POST https://api.predictionguard.com/chat/completions \
+	curl -i -X POST https://staging.predictionguard.com/chat/completions \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "neural-chat-7b-v3-3", \
+		"model": "Hermes-2-Pro-Llama-3-8B", \
 		"messages": [ \
 			{ \
 			"role": "user", \
-			"content": "How do you feel about the world in general" \
+			"content": "How do you feel about the world in general. I think the world is grand." \
 			} \
 		], \
 		"stream": true, \
@@ -92,7 +92,7 @@ go-chat-sse:
 	go run examples/chat/sse/main.go
 
 curl-chat-vision:
-	curl -i -X POST https://api.predictionguard.com/chat/completions \
+	curl -i -X POST https://staging.predictionguard.com/chat/completions \
      -H "x-api-key: ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -124,16 +124,16 @@ go-chat-vision:
 	go run examples/chat/vision/main.go
 
 curl-embed-get:
-	curl -i -X GET https://api.predictionguard.com/embeddings \
+	curl -i -X GET https://staging.predictionguard.com/embeddings \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json"
 
 curl-comp:
-	curl -i -X POST https://api.predictionguard.com/completions \
+	curl -i -X POST https://staging.predictionguard.com/completions \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
-		"model": "neural-chat-7b-v3-3", \
+		"model": "Hermes-2-Pro-Llama-3-8B", \
 		"prompt": "Will I lose my hair by the time I am 64?", \
 		"max_tokens": 1000, \
 		"temperature": 1.1, \
@@ -153,7 +153,7 @@ go-comp:
 	go run examples/completion/main.go
 
 curl-embed:
-	curl -i -X POST https://api.predictionguard.com/embeddings \
+	curl -i -X POST https://staging.predictionguard.com/embeddings \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -170,7 +170,7 @@ go-embed:
 	go run examples/embedding/main.go
 
 curl-factuality:
-	curl -X POST https://api.predictionguard.com/factuality \
+	curl -X POST https://staging.predictionguard.com/factuality \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -182,14 +182,14 @@ go-factuality:
 	go run examples/factuality/main.go
 
 curl-health:
-	curl -i https://api.predictionguard.com \
+	curl -i https://staging.predictionguard.com \
      -H "x-api-key: ${PREDICTIONGUARD_API_KEY}"
 
 go-health:
 	go run examples/healthcheck/main.go
 
 curl-injection:
-	curl -X POST https://api.predictionguard.com/injection \
+	curl -X POST https://staging.predictionguard.com/injection \
 	 -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -201,7 +201,7 @@ go-injection:
 	go run examples/injection/main.go
 
 curl-ReplacePII:
-	curl -X POST https://api.predictionguard.com/PII \
+	curl -X POST https://staging.predictionguard.com/PII \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -214,7 +214,7 @@ go-ReplacePII:
 	go run examples/repalce_personal_information/main.go
 
 curl-toxicity:
-	curl -X POST https://api.predictionguard.com/toxicity \
+	curl -X POST https://staging.predictionguard.com/toxicity \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
@@ -225,7 +225,7 @@ go-detect-toxicity:
 	go run examples/toxicity/main.go
 
 curl-translate:
-	curl -X POST https://api.predictionguard.com/translate \
+	curl -X POST https://staging.predictionguard.com/translate \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
