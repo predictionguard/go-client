@@ -98,7 +98,7 @@ go-chat-sse:
 
 curl-chat-vision:
 	curl -i -X POST https://api.predictionguard.com/chat/completions \
-     -H "x-api-key: ${PREDICTIONGUARD_API_KEY}" \
+     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
      -d '{ \
 		"model": "llava-1.5-7b-hf", \
@@ -188,7 +188,7 @@ go-factuality:
 
 curl-health:
 	curl -i https://api.predictionguard.com \
-     -H "x-api-key: ${PREDICTIONGUARD_API_KEY}"
+     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
 
 go-health:
 	go run examples/healthcheck/main.go
