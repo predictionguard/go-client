@@ -14,6 +14,11 @@ curl-cap-vision:
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json"
 
+curl-embed-get:
+	curl -i -X GET https://api.predictionguard.com/embeddings \
+     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
+     -H "Content-Type: application/json"
+
 go-capability:
 	go run examples/capability/main.go
 
@@ -127,11 +132,6 @@ curl-chat-vision:
 
 go-chat-vision:
 	go run examples/chat/vision/main.go
-
-curl-embed-get:
-	curl -i -X GET https://api.predictionguard.com/embeddings \
-     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
-     -H "Content-Type: application/json"
 
 curl-comp:
 	curl -i -X POST https://api.predictionguard.com/completions \
