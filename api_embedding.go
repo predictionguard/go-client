@@ -33,6 +33,17 @@ type Embedding struct {
 // the use case would be like a video frame plus the transcription or an image
 // plus a caption. The response should include the output vector.
 func (cln *Client) Embedding(ctx context.Context, model string, input []EmbeddingInput) (Embedding, error) {
+	return cln.embedding(ctx, model, input, nil, nil)
+}
+
+// EmbeddingWithTruncate behaves like Embedding but provides an option to set
+// a truncation direction for models that support truncation.
+func (cln *Client) EmbeddingWithTruncate(ctx context.Context, model string, input []EmbeddingInput, direction Direction) (Embedding, error) {
+	truncate := true
+	return cln.embedding(ctx, model, input, &truncate, &direction)
+}
+
+func (cln *Client) embedding(ctx context.Context, model string, input []EmbeddingInput, truncate *bool, truncateDir *Direction) (Embedding, error) {
 	url := fmt.Sprintf("%s/embeddings", cln.host)
 
 	type embeddingInput struct {
@@ -57,12 +68,21 @@ func (cln *Client) Embedding(ctx context.Context, model string, input []Embeddin
 		}
 	}
 
+	var direction *string
+	if truncateDir != nil {
+		direction = &truncateDir.value
+	}
+
 	body := struct {
-		Model string           `json:"model"`
-		Input []embeddingInput `json:"input"`
+		Model       string           `json:"model"`
+		Truncate    *bool            `json:"truncate,omitempty"`
+		TruncateDir *string          `json:"truncation_direction,omitempty"`
+		Input       []embeddingInput `json:"input"`
 	}{
-		Model: model,
-		Input: data,
+		Model:       model,
+		Truncate:    truncate,
+		TruncateDir: direction,
+		Input:       data,
 	}
 
 	var resp Embedding

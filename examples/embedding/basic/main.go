@@ -33,14 +33,14 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	image, err := client.NewImageNetwork("https://pbs.twimg.com/profile_images/1571574401107169282/ylAgz_f5_400x400.jpg")
+	image, err := client.NewImageNetwork("https://predictionguard.com/lib_eltrNYEjQbpUWFRI/oy2r533pndpk0q8q.png?w=1024&dpr=2")
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	input := []client.EmbeddingInput{
 		{
-			Text:  "This is Bill Kennedy, a decent Go developer.",
+			Text:  "This is prediction guard.",
 			Image: image,
 		},
 	}
