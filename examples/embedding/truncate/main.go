@@ -33,7 +33,7 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.EmbeddingInput{
+	input := client.EmbeddingInputs{
 		{
 			Text: "This is Bill Kennedy, a decent Go developer.",
 		},

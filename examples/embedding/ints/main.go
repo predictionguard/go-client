@@ -33,19 +33,11 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	image, err := client.NewImageNetwork("https://predictionguard.com/lib_eltrNYEjQbpUWFRI/oy2r533pndpk0q8q.png?w=1024&dpr=2")
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	input := client.EmbeddingIntInputs{
+		{0, 3293, 83, 19893, 118963, 25, 7, 3034, 5, 2},
 	}
 
-	input := client.EmbeddingInputs{
-		{
-			Text:  "This is prediction guard.",
-			Image: image,
-		},
-	}
-
-	resp, err := cln.Embedding(ctx, "bridgetower-large-itm-mlm-itc", input)
+	resp, err := cln.Embedding(ctx, "multilingual-e5-large-instruct", input)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}

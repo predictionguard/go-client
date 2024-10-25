@@ -28,6 +28,7 @@ func Test_Client(t *testing.T) {
 	runTests(t, factualityTests(service), "factuality")
 	runTests(t, injectionTests(service), "injection")
 	runTests(t, ReplacePIITests(service), "ReplacePII")
+	runTests(t, tokenizeTests(service), "tokenize")
 	runTests(t, toxicityTests(service), "toxicity")
 	runTests(t, translateTests(service), "translate")
 }
@@ -447,7 +448,7 @@ func embeddingTests(srv *service) []table {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
 				defer cancel()
 
-				input := []client.EmbeddingInput{
+				input := client.EmbeddingInputs{
 					{
 						Text:  "This is Bill Kennedy, a decent Go developer.",
 						Image: client.ImageBase64{},
@@ -455,6 +456,42 @@ func embeddingTests(srv *service) []table {
 				}
 
 				resp, err := srv.Client.Embedding(ctx, "bridgetower-large-itm-mlm-itc", input)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name: "ints",
+			ExpResp: client.Embedding{
+				ID:      "emb-0qU4sYEutZvkHskxXwzYDgZVOhtLw",
+				Object:  "list",
+				Created: client.ToTime(1717439154),
+				Model:   "bridgetower-large-itm-mlm-itc",
+				Data: []client.EmbeddingData{
+					{
+						Index:  0,
+						Object: "embedding",
+						Embedding: []float64{
+							0.04457271471619606,
+						},
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := client.EmbeddingIntInputs{
+					{0, 3293, 83, 19893, 118963, 25, 7, 3034, 5, 2},
+				}
+
+				resp, err := srv.Client.Embedding(ctx, "multilingual-e5-large-instruct", input)
 				if err != nil {
 					return err
 				}
@@ -643,6 +680,76 @@ func ReplacePIITests(srv *service) []table {
 				defer cancel()
 
 				resp, err := srv.BadClient.ReplacePII(ctx, "", client.ReplaceMethods.Mask)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
+	}
+
+	return table
+}
+
+func tokenizeTests(srv *service) []table {
+	table := []table{
+		{
+			Name: "basic",
+			ExpResp: client.Tokenize{
+				ID:      "token-ab046fcf-945f-421c-b9f0-1c75ff355203",
+				Object:  "tokens",
+				Created: client.ToTime(1729871708),
+				Data: []client.TokenData{
+					{
+						ID:    0,
+						Start: 0,
+						Stop:  0,
+						Text:  "<s>",
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := client.TokenizeInput{
+					Model: "Hermes-2-Pro-Mistral-7B",
+					Input: "how many tokens exist for this sentence.",
+				}
+
+				resp, err := srv.Client.Tokenize(ctx, input)
+				if err != nil {
+					return fmt.Errorf("ERROR: %w", err)
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Tokenize(ctx, client.TokenizeInput{})
 				if err != nil {
 					return err
 				}
@@ -901,6 +1008,7 @@ func newService(t *testing.T) *service {
 	mux.HandleFunc("POST /embeddings", s.embeddings)
 	mux.HandleFunc("POST /injection", s.injection)
 	mux.HandleFunc("POST /PII", s.ReplacePII)
+	mux.HandleFunc("POST /tokenize", s.tokenize)
 	mux.HandleFunc("POST /toxicity", s.toxicity)
 	mux.HandleFunc("POST /translate", s.translate)
 
@@ -1040,6 +1148,19 @@ func (s *service) ReplacePII(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := `{"checks":[{"new_prompt":"My email is * and my number is *.","index":0,"status":"success"}],"created":"1715730803","id":"pii-ax9rE9ld3W5yxN1Sz7OKxXkMTMo736jJ","object":"pii_check"}`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
+}
+
+func (s *service) tokenize(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	resp := `{"id": "token-ab046fcf-945f-421c-b9f0-1c75ff355203","object": "tokens","created": 1729871708,"model": "multilingual-e5-large-instruct","data": [{"id": 0,"start": 0,"stop": 0,"text": "<s>"}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -1321,7 +1442,7 @@ func ExampleClient_Embedding() {
 		log.Fatalln("ERROR: %w", err)
 	}
 
-	input := []client.EmbeddingInput{
+	input := client.EmbeddingInputs{
 		{
 			Text:  "This is Bill Kennedy, a decent Go developer.",
 			Image: image,
@@ -1357,7 +1478,7 @@ func ExampleClient_EmbeddingWithTruncate() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	input := []client.EmbeddingInput{
+	input := client.EmbeddingInputs{
 		{
 			Text: "This is Bill Kennedy, a decent Go developer.",
 		},
@@ -1459,6 +1580,38 @@ func ExampleClient_ReplacePII() {
 	}
 
 	fmt.Println(resp.Checks[0].NewPrompt)
+}
+
+func ExampleClient_Tokenize() {
+	// examples/tokenize/main.go
+
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+
+	logger := func(ctx context.Context, msg string, v ...any) {
+		s := fmt.Sprintf("msg: %s", msg)
+		for i := 0; i < len(v); i = i + 2 {
+			s = s + fmt.Sprintf(", %s: %v", v[i], v[i+1])
+		}
+		log.Println(s)
+	}
+
+	cln := client.New(logger, host, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	input := client.TokenizeInput{
+		Model: "Hermes-2-Pro-Mistral-7B",
+		Input: "how many tokens exist for this sentence.",
+	}
+
+	resp, err := cln.Tokenize(ctx, input)
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	fmt.Println(resp.Data)
 }
 
 func ExampleClient_Toxicity() {

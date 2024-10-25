@@ -22,6 +22,12 @@ type OutputExtension struct {
 // =============================================================================
 // Basic Chat Completions
 
+// ChatInputTypes defines behavior any chat input type must implement. The
+// method doesn't need to do anything, it just needs to exist.
+type ChatInputTypes interface {
+	ChatInputType()
+}
+
 // ChatInputMessage represents a role and content related to a chat.
 type ChatInputMessage struct {
 	Role    Role
@@ -79,14 +85,8 @@ type Chat struct {
 	Choices []ChatChoice `json:"choices"`
 }
 
-// ChatInputTypes defines behavior any chat input type must implement. The
-// method doesn't need to do anything, it just needs to exist.
-type ChatInputTypes interface {
-	ChatInputType()
-}
-
 // Chat generate chat completions based on a conversation history.
-func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, error) {
+func (cln *Client) Chat(ctx context.Context, input ChatInputTypes) (Chat, error) {
 	url := fmt.Sprintf("%s/chat/completions", cln.host)
 
 	// -------------------------------------------------------------------------
@@ -110,11 +110,11 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 
 	// -------------------------------------------------------------------------
 
-	var input ChatInputMulti
+	var inputMulti ChatInputMulti
 
-	switch v := inputType.(type) {
+	switch v := input.(type) {
 	case ChatInput:
-		input = ChatInputMulti{
+		inputMulti = ChatInputMulti{
 			Model: v.Model,
 			Messages: []ChatInputMessage{
 				{
@@ -131,13 +131,13 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 		}
 
 	case ChatInputMulti:
-		input = v
+		inputMulti = v
 	}
 
 	// -------------------------------------------------------------------------
 
-	inputs := make([]chatMessage, len(input.Messages))
-	for i, inp := range input.Messages {
+	inputs := make([]chatMessage, len(inputMulti.Messages))
+	for i, inp := range inputMulti.Messages {
 		inputs[i] = chatMessage{
 			Role:    inp.Role,
 			Content: inp.Content,
@@ -154,31 +154,31 @@ func (cln *Client) Chat(ctx context.Context, inputType ChatInputTypes) (Chat, er
 		InputExtension  *inputExtension  `json:"input,omitempty"`
 		OutputExtension *outputExtension `json:"output,omitempty"`
 	}{
-		Model:       input.Model,
+		Model:       inputMulti.Model,
 		Messages:    inputs,
-		MaxTokens:   input.MaxTokens,
-		Temperature: input.Temperature,
-		TopP:        input.TopP,
-		TopK:        input.TopK,
+		MaxTokens:   inputMulti.MaxTokens,
+		Temperature: inputMulti.Temperature,
+		TopP:        inputMulti.TopP,
+		TopK:        inputMulti.TopK,
 	}
 
 	// -------------------------------------------------------------------------
 
-	if input.InputExtension != nil {
-		if (input.InputExtension.BlockPromptInjection || input.InputExtension.PII != PII{} || input.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
+	if inputMulti.InputExtension != nil {
+		if (inputMulti.InputExtension.BlockPromptInjection || inputMulti.InputExtension.PII != PII{} || inputMulti.InputExtension.PIIReplaceMethod != ReplaceMethod{}) {
 			body.InputExtension = &inputExtension{
-				BlockPromptInjection: input.InputExtension.BlockPromptInjection,
-				PII:                  input.InputExtension.PII.value,
-				PIIReplaceMethod:     input.InputExtension.PIIReplaceMethod,
+				BlockPromptInjection: inputMulti.InputExtension.BlockPromptInjection,
+				PII:                  inputMulti.InputExtension.PII.value,
+				PIIReplaceMethod:     inputMulti.InputExtension.PIIReplaceMethod,
 			}
 		}
 	}
 
-	if input.OutputExtension != nil {
-		if input.OutputExtension.Factuality || input.OutputExtension.Toxicity {
+	if inputMulti.OutputExtension != nil {
+		if inputMulti.OutputExtension.Factuality || inputMulti.OutputExtension.Toxicity {
 			body.OutputExtension = &outputExtension{
-				Factuality: input.OutputExtension.Factuality,
-				Toxicity:   input.OutputExtension.Toxicity,
+				Factuality: inputMulti.OutputExtension.Factuality,
+				Toxicity:   inputMulti.OutputExtension.Toxicity,
 			}
 		}
 	}

@@ -33,26 +33,17 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	image, err := client.NewImageNetwork("https://predictionguard.com/lib_eltrNYEjQbpUWFRI/oy2r533pndpk0q8q.png?w=1024&dpr=2")
+	input := client.TokenizeInput{
+		Model: "Hermes-2-Pro-Mistral-7B",
+		Input: "how many tokens exist for this sentence.",
+	}
+
+	resp, err := cln.Tokenize(ctx, input)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	input := client.EmbeddingInputs{
-		{
-			Text:  "This is prediction guard.",
-			Image: image,
-		},
-	}
-
-	resp, err := cln.Embedding(ctx, "bridgetower-large-itm-mlm-itc", input)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
-	}
-
-	for _, data := range resp.Data {
-		fmt.Print(data.Embedding)
-	}
+	fmt.Println(resp.Data)
 
 	return nil
 }

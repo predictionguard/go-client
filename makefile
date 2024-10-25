@@ -174,6 +174,32 @@ curl-embed-basic:
 go-embed-basic:
 	go run examples/embedding/basic/main.go
 
+curl-embed-ints:
+	curl -i -X POST http://localhost:6000/embeddings \
+     -H "Authorization: Bearer $(PG_API_PREDICTIONGUARD_API_KEY)" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"model": "multilingual-e5-large-instruct", \
+		"input": [ \
+			[0, 3293, 83, 19893, 118963, 25, 7, 3034, 5, 2] \
+		] \
+	}'
+
+go-embed-ints:
+	go run examples/embedding/ints/main.go
+
+curl-tokenize:
+	curl -i -X POST https://api.predictionguard.com/tokenize \
+     -H "Authorization: Bearer $(PREDICTIONGUARD_API_KEY)" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"model": "Hermes-2-Pro-Mistral-7B", \
+		"input": "how many tokens exist for this sentence." \
+	}'
+
+go-tokenize:
+	go run examples/tokenize/main.go
+
 curl-embed-truncate:
 	curl -i -X POST https://api.predictionguard.com/embeddings \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
