@@ -3,18 +3,22 @@ package client
 import "fmt"
 
 type capabilitySet struct {
-	Completion           Capability
-	ChatCompletion       Capability
-	ChatCompletionVision Capability
-	Embedding            Capability
+	ChatCompletion     Capability
+	ChatWithImage      Capability
+	Completion         Capability
+	Embedding          Capability
+	EmbeddingWithImage Capability
+	Tokenize           Capability
 }
 
 // Capabilities represents the set of model capabilities.
 var Capabilities = capabilitySet{
-	Completion:           newCapability("completion"),
-	ChatCompletion:       newCapability("chat_completion"),
-	ChatCompletionVision: newCapability("chat_completion_vision"),
-	Embedding:            newCapability("embedding"),
+	ChatCompletion:     newCapability("chat-completion"),
+	ChatWithImage:      newCapability("chat-with-image"),
+	Completion:         newCapability("completion"),
+	Embedding:          newCapability("embedding"),
+	EmbeddingWithImage: newCapability("embedding-with-image"),
+	Tokenize:           newCapability("tokenize"),
 }
 
 // Parse parses the string value and returns a capability if one exists.

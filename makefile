@@ -4,19 +4,14 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Examples
 
-curl-cap-chat:
-	curl -i -X GET https://api.predictionguard.com/chat/completions \
-     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
+curl-capability:
+	curl -i -X GET https://api.predictionguard.com/models \
+     -H "Authorization: Bearer $(PREDICTIONGUARD_API_KEY)" \
      -H "Content-Type: application/json"
 
-curl-cap-vision:
-	curl -i -X GET https://api.predictionguard.com/chat/completions/vision \
-     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
-     -H "Content-Type: application/json"
-
-curl-embed-get:
-	curl -i -X GET https://api.predictionguard.com/embeddings \
-     -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
+curl-capability-completion-chat:
+	curl -i -X GET https://api.predictionguard.com/models/chat-completion \
+     -H "Authorization: Bearer $(PREDICTIONGUARD_API_KEY)" \
      -H "Content-Type: application/json"
 
 go-capability:
