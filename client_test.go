@@ -34,18 +34,32 @@ func Test_Client(t *testing.T) {
 }
 
 func capabilityTests(srv *service) []table {
+	created, _ := time.Parse(time.RFC3339, "2024-10-31T00:00:00Z")
+
 	table := []table{
 		{
 			Name: "basic",
-			ExpResp: []string{
-				"Hermes-2-Pro-Mistral-7B",
-				"neural-chat-7b-v3-3",
-				"llama-3-sqlcoder-8b",
-				"deepseek-coder-6.7b-instruct",
-				"Hermes-2-Pro-Llama-3-8B",
-				"llava-1.5-7b-hf",
-				"Hermes-3-Llama-3.1-8B",
-				"Hermes-3-Llama-3.1-70B",
+			ExpResp: client.ModelResponse{
+				Object: "list",
+				Data: []client.ModelData{
+					{
+						ID:               "llava-1.5-7b-hf",
+						Object:           "model",
+						Created:          created,
+						OwnedBy:          "llava hugging face",
+						Description:      "Open-source multimodal chatbot trained by fine-tuning LLaMa/Vicuna.",
+						MaxContextLength: 8192,
+						PromptFormat:     "llava",
+						Capabilities: client.ModelCapabilities{
+							ChatCompletion:     true,
+							ChatWithImage:      true,
+							Completion:         false,
+							Embedding:          false,
+							EmbeddingWithImage: false,
+							Tokenize:           false,
+						},
+					},
+				},
 			},
 			ExcFunc: func(ctx context.Context) any {
 				ctx, cancel := context.WithTimeout(ctx, time.Second)
@@ -1001,7 +1015,7 @@ func newService(t *testing.T) *service {
 		server: srv,
 	}
 
-	mux.HandleFunc("GET /chat/completions", s.capability)
+	mux.HandleFunc("GET /models/{capability}", s.capability)
 	mux.HandleFunc("POST /chat/completions", s.chat)
 	mux.HandleFunc("POST /completions", s.completion)
 	mux.HandleFunc("POST /factuality", s.factuality)
@@ -1021,7 +1035,7 @@ func (s *service) capability(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := `["Hermes-2-Pro-Mistral-7B","neural-chat-7b-v3-3","llama-3-sqlcoder-8b","deepseek-coder-6.7b-instruct","Hermes-2-Pro-Llama-3-8B","llava-1.5-7b-hf","Hermes-3-Llama-3.1-8B","Hermes-3-Llama-3.1-70B"]`
+	resp := `{"object":"list","data":[{"id":"llava-1.5-7b-hf","object":"model","created":"2024-10-31T00:00:00Z","owned_by":"llava hugging face","description":"Open-source multimodal chatbot trained by fine-tuning LLaMa/Vicuna.","max_context_length":8192,"prompt_format":"llava","capabilities":{"chat_completion":true,"chat_with_image":true,"completion":false,"embedding":false,"embedding_with_image":false,"tokenize":false}}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
