@@ -244,7 +244,7 @@ curl-injection:
 go-injection:
 	go run examples/injection/main.go
 
-curl-ReplacePII:
+curl-replace-pii:
 	curl -X POST https://api.predictionguard.com/PII \
      -H "Authorization: Bearer ${PREDICTIONGUARD_API_KEY}" \
      -H "Content-Type: application/json" \
@@ -254,8 +254,22 @@ curl-ReplacePII:
 		"replace_method": "mask" \
 	}'
 
-go-ReplacePII:
-	go run examples/repalce_personal_information/main.go
+go-replace-pii:
+	go run examples/replacepi/main.go
+
+curl-rerank:
+	curl -i -X POST https://api.predictionguard.com/rerank \
+     -H "Authorization: Bearer $(PREDICTIONGUARD_API_KEY)" \
+     -H "Content-Type: application/json" \
+     -d '{ \
+		"model": "bge-reranker-v2-m3", \
+		"query": "What is Deep Learning?", \
+		"documents": ["Deep Learning is not pizza.", "Deep Learning is pizza."], \
+		"return_documents": true \
+     }'
+
+go-rerank:
+	go run examples/rerank/main.go
 
 curl-toxicity:
 	curl -X POST https://api.predictionguard.com/toxicity \

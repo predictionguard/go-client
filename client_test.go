@@ -27,7 +27,8 @@ func Test_Client(t *testing.T) {
 	runTests(t, embeddingTests(service), "embedding")
 	runTests(t, factualityTests(service), "factuality")
 	runTests(t, injectionTests(service), "injection")
-	runTests(t, ReplacePIITests(service), "ReplacePII")
+	runTests(t, replacePIITests(service), "replacePII")
+	runTests(t, rerankTests(service), "rerank")
 	runTests(t, tokenizeTests(service), "tokenize")
 	runTests(t, toxicityTests(service), "toxicity")
 	runTests(t, translateTests(service), "translate")
@@ -653,7 +654,7 @@ func injectionTests(srv *service) []table {
 	return table
 }
 
-func ReplacePIITests(srv *service) []table {
+func replacePIITests(srv *service) []table {
 	table := []table{
 		{
 			Name: "basic",
@@ -694,6 +695,83 @@ func ReplacePIITests(srv *service) []table {
 				defer cancel()
 
 				resp, err := srv.BadClient.ReplacePII(ctx, "", client.ReplaceMethods.Mask)
+				if err != nil {
+					return err
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotErr, ok := got.(error)
+				if !ok {
+					return "didn't get an error"
+				}
+				expErr := exp.(error)
+
+				if !errors.Is(gotErr, expErr) {
+					return "diff"
+				}
+
+				return ""
+			},
+		},
+	}
+
+	return table
+}
+
+func rerankTests(srv *service) []table {
+	table := []table{
+		{
+			Name: "basic",
+			ExpResp: client.Rerank{
+				ID:      "rerank-837eef1d-90d1-416a-bf8b-948a42998dd7",
+				Object:  "list",
+				Created: client.ToTime(1732230548),
+				Model:   "bge-reranker-v2-m3",
+				Results: []client.RerankResult{
+					{
+						Index:          0,
+						RelevanceScore: 0.06572466,
+						Text:           "Deep Learning is not pizza.",
+					},
+					{
+						Index:          1,
+						RelevanceScore: 0.054098696,
+						Text:           "Deep Learning is pizza.",
+					},
+				},
+			},
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				input := client.RerankInput{
+					Model:           "bge-reranker-v2-m3",
+					Query:           "What is Deep Learning?",
+					Documents:       []string{"Deep Learning is not pizza.", "Deep Learning is pizza."},
+					ReturnDocuments: true,
+				}
+
+				resp, err := srv.Client.Rerank(ctx, input)
+				if err != nil {
+					return fmt.Errorf("ERROR: %w", err)
+				}
+
+				return resp
+			},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:    "badkey",
+			ExpResp: client.ErrUnauthorized,
+			ExcFunc: func(ctx context.Context) any {
+				ctx, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+
+				resp, err := srv.BadClient.Rerank(ctx, client.RerankInput{})
 				if err != nil {
 					return err
 				}
@@ -1022,6 +1100,7 @@ func newService(t *testing.T) *service {
 	mux.HandleFunc("POST /embeddings", s.embeddings)
 	mux.HandleFunc("POST /injection", s.injection)
 	mux.HandleFunc("POST /PII", s.ReplacePII)
+	mux.HandleFunc("POST /rerank", s.Rerank)
 	mux.HandleFunc("POST /tokenize", s.tokenize)
 	mux.HandleFunc("POST /toxicity", s.toxicity)
 	mux.HandleFunc("POST /translate", s.translate)
@@ -1162,6 +1241,19 @@ func (s *service) ReplacePII(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := `{"checks":[{"new_prompt":"My email is * and my number is *.","index":0,"status":"success"}],"created":"1715730803","id":"pii-ax9rE9ld3W5yxN1Sz7OKxXkMTMo736jJ","object":"pii_check"}`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
+}
+
+func (s *service) Rerank(w http.ResponseWriter, r *http.Request) {
+	if v := r.Header.Get("authorization"); v == "Bearer" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	resp := `{"id":"rerank-837eef1d-90d1-416a-bf8b-948a42998dd7","object":"list","created":1732230548,"model":"bge-reranker-v2-m3","results":[{"index":0,"relevance_score":0.06572466,"text":"Deep Learning is not pizza."},{"index":1,"relevance_score":0.054098696,"text":"Deep Learning is pizza."}]}`
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -1594,6 +1686,40 @@ func ExampleClient_ReplacePII() {
 	}
 
 	fmt.Println(resp.Checks[0].NewPrompt)
+}
+
+func ExampleClient_Rerank() {
+	// examples/rerank/main.go
+
+	host := "https://api.predictionguard.com"
+	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+
+	logger := func(ctx context.Context, msg string, v ...any) {
+		s := fmt.Sprintf("msg: %s", msg)
+		for i := 0; i < len(v); i = i + 2 {
+			s = s + fmt.Sprintf(", %s: %v", v[i], v[i+1])
+		}
+		log.Println(s)
+	}
+
+	cln := client.New(logger, host, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	input := client.RerankInput{
+		Model:           "bge-reranker-v2-m3",
+		Query:           "What is Deep Learning?",
+		Documents:       []string{"Deep Learning is not pizza.", "Deep Learning is pizza."},
+		ReturnDocuments: true,
+	}
+
+	resp, err := cln.Rerank(ctx, input)
+	if err != nil {
+		log.Fatalln("ERROR:", err)
+	}
+
+	fmt.Println(resp.Results)
 }
 
 func ExampleClient_Tokenize() {

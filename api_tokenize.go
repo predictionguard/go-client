@@ -8,8 +8,8 @@ import (
 
 // TokenizeInput represents input for tokenizing text.
 type TokenizeInput struct {
-	Model string
-	Input string
+	Model string `json:"model"`
+	Input string `json:"input"`
 }
 
 // TokenData represents a single token of information.
@@ -32,10 +32,7 @@ type Tokenize struct {
 func (cln *Client) Tokenize(ctx context.Context, input TokenizeInput) (Tokenize, error) {
 	url := fmt.Sprintf("%s/tokenize", cln.host)
 
-	body := struct {
-		Model string `json:"model"`
-		Input string `json:"input"`
-	}{
+	body := TokenizeInput{
 		Model: input.Model,
 		Input: input.Input,
 	}
