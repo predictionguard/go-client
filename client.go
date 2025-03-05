@@ -11,19 +11,14 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v0.33.0"
+const version = "v2.0.0"
 
-// ErrUnauthorized represent a situation where authentication fails.
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
-// This provides a default client configuration and is set with reasonable
-// defaults. Users can replace this client with application specific settings
-// using the WithClient function at the time a Client is constructed.
 var defaultClient = http.Client{
 	Transport: &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -40,25 +35,19 @@ var defaultClient = http.Client{
 	},
 }
 
-// Logger represents a function that will be called to add information
-// to the user's application logs.
 type Logger func(context.Context, string, ...any)
 
 // =============================================================================
 
-// Client represents a client that can talk to the PG API service.
 type Client struct {
 	log    Logger
-	host   string
 	apiKey string
 	http   *http.Client
 }
 
-// New constructs a Client that can be used to talk with the PG API service.
-func New(log Logger, host string, apiKey string, options ...func(cln *Client)) *Client {
+func New(log Logger, apiKey string, options ...func(cln *Client)) *Client {
 	cln := Client{
 		log:    log,
-		host:   strings.TrimLeft(host, "/"),
 		apiKey: apiKey,
 		http:   &defaultClient,
 	}
@@ -70,20 +59,22 @@ func New(log Logger, host string, apiKey string, options ...func(cln *Client)) *
 	return &cln
 }
 
-// WithClient adds a custom client for processing requests. It's recommend
-// to not use the default client and provide your own.
 func WithClient(http *http.Client) func(cln *Client) {
 	return func(cln *Client) {
 		cln.http = http
 	}
 }
 
-func (cln *Client) do(ctx context.Context, method string, endpoint string, body any, v any) error {
+func (cln *Client) Do(ctx context.Context, method string, endpoint string, body D, v any) error {
 	resp, err := do(ctx, cln, method, endpoint, body)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNoContent {
+		return nil
+	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -105,17 +96,19 @@ func (cln *Client) do(ctx context.Context, method string, endpoint string, body 
 
 // =============================================================================
 
-type sseClient[T any] struct {
+type SSEClient[T any] struct {
 	*Client
 }
 
-func newSSEClient[T any](cln *Client) sseClient[T] {
-	return sseClient[T]{
+func NewSSE[T any](log Logger, apiKey string, options ...func(cln *Client)) SSEClient[T] {
+	cln := New(log, apiKey, options...)
+
+	return SSEClient[T]{
 		Client: cln,
 	}
 }
 
-func (cln *sseClient[T]) do(ctx context.Context, method string, endpoint string, body any, ch chan T) error {
+func (cln *SSEClient[T]) Do(ctx context.Context, method string, endpoint string, body D, ch chan T) error {
 	resp, err := do(ctx, cln.Client, method, endpoint, body)
 	if err != nil {
 		return err
@@ -190,7 +183,11 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 	// Assign for logging the status code at the end of the function call.
 	statusCode = resp.StatusCode
 
-	if statusCode != http.StatusOK {
+	switch statusCode {
+	case http.StatusOK, http.StatusNoContent:
+		return resp, nil
+
+	default:
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("readall: error: %w", err)
@@ -209,13 +206,10 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 			return nil, fmt.Errorf("error: response: %s", err.Message)
 		}
 	}
-
-	return resp, nil
 }
 
 // =============================================================================
 
-// Ptr converts any value into a pointer of that value.
 func Ptr[T any](t T) *T {
 	return &t
 }

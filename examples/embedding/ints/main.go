@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,18 +29,25 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	input := client.EmbeddingIntInputs{
-		{0, 3293, 83, 19893, 118963, 25, 7, 3034, 5, 2},
+	d := client.D{
+		"model":    "bridgetower-large-itm-mlm-itc",
+		"truncate": false,
+		"input": [][]int{
+			{0, 3293, 83, 19893, 118963, 25, 7, 3034, 5, 2},
+		},
 	}
 
-	resp, err := cln.Embedding(ctx, "multilingual-e5-large-instruct", input)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/embeddings"
+
+	var resp client.Embedding
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	for _, data := range resp.Data {

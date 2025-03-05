@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,21 +29,24 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	input := client.RerankInput{
-		Model:           "bge-reranker-v2-m3",
-		Query:           "What is Deep Learning?",
-		Documents:       []string{"Deep Learning is not pizza.", "Deep Learning is pizza."},
-		ReturnDocuments: true,
+	d := client.D{
+		"model":            "bge-reranker-v2-m3",
+		"query":            "What is Deep Learning?",
+		"documents":        []string{"Deep Learning is not pizza.", "Deep Learning is pizza."},
+		"return_documents": true,
 	}
 
-	resp, err := cln.Rerank(ctx, input)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/rerank"
+
+	var resp client.Rerank
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	fmt.Println(resp.Results)

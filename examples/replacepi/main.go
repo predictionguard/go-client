@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,16 +29,25 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
 	prompt := "My email is bill@ardanlabs.com and my number is 954-123-4567."
 
-	resp, err := cln.ReplacePII(ctx, prompt, client.ReplaceMethods.Mask)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	d := client.D{
+		"prompt":         prompt,
+		"replace":        true,
+		"replace_method": "mask",
+	}
+
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/PII"
+
+	var resp client.ReplacePII
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	fmt.Println(resp.Checks[0].NewPrompt)

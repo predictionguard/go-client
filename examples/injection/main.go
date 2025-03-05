@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,16 +29,24 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
 	prompt := "A short poem may be a stylistic choice or it may be that you have said what you intended to say in a more concise way."
 
-	resp, err := cln.Injection(ctx, prompt)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	d := client.D{
+		"prompt": prompt,
+		"detect": true,
+	}
+
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/injection"
+
+	var resp client.Injection
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	fmt.Println(resp.Checks[0].Probability)

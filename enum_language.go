@@ -76,7 +76,6 @@ type languageSet struct {
 	Vietnamese Language
 }
 
-// Languages represents the set of languages that can be used.
 var Languages = languageSet{
 	Afrikanns:  newLanguage("afr"),
 	Amharic:    newLanguage("amh"),
@@ -151,7 +150,6 @@ var Languages = languageSet{
 	Vietnamese: newLanguage("vie"),
 }
 
-// Parse parses the string value and returns a language if one exists.
 func (languageSet) Parse(value string) (Language, error) {
 	lang, exists := languages[value]
 	if !exists {
@@ -161,8 +159,6 @@ func (languageSet) Parse(value string) (Language, error) {
 	return lang, nil
 }
 
-// MustParse parses the string value and returns a language if one
-// exists. If an error occurs the function panics.
 func (languageSet) MustParse(value string) Language {
 	lang, err := Languages.Parse(value)
 	if err != nil {
@@ -174,10 +170,8 @@ func (languageSet) MustParse(value string) Language {
 
 // =============================================================================
 
-// Set of known languages.
 var languages = make(map[string]Language)
 
-// Language represents a language in the system.
 type Language struct {
 	value string
 }
@@ -188,12 +182,10 @@ func newLanguage(code string) Language {
 	return l
 }
 
-// String returns the ISO-639 code of the language.
 func (l Language) String() string {
 	return l.value
 }
 
-// UnmarshalText implement the unmarshal interface for JSON conversions.
 func (l *Language) UnmarshalText(data []byte) error {
 	lang, err := Languages.Parse(string(data))
 	if err != nil {
@@ -204,12 +196,10 @@ func (l *Language) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// MarshalText implement the marshal interface for JSON conversions.
 func (l Language) MarshalText() ([]byte, error) {
 	return []byte(l.value), nil
 }
 
-// Equal provides support for the go-cmp package and testing.
 func (l Language) Equal(l2 Language) bool {
 	return l.value == l2.value
 }

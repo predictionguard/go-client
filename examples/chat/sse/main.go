@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -18,8 +19,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -29,34 +30,36 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.NewSSE[client.ChatSSE](logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	input := client.ChatSSEInput{
-		Model: "neural-chat-7b-v3-3",
-		Messages: []client.ChatInputMessage{
+	d := client.D{
+		"model": "neural-chat-7b-v3-3",
+		"messages": []client.D{
 			{
-				Role:    client.Roles.User,
-				Content: "How do you feel about the world in general",
+				"role":    "user",
+				"content": "How do you feel about the world in general",
 			},
 		},
-		MaxTokens:   client.Ptr(1000),
-		Temperature: client.Ptr[float32](0.1),
-		TopP:        client.Ptr(0.1),
-		TopK:        client.Ptr(50),
-		InputExtension: &client.InputExtension{
-			PII:              client.PIIs.Replace,
-			PIIReplaceMethod: client.ReplaceMethods.Random,
+		"stream":      true,
+		"max_tokens":  1000,
+		"temperature": 0.1,
+		"top_p":       0.1,
+		"top_k":       50,
+		"input": client.D{
+			"pii":                client.PIIs.Replace,
+			"pii_replace_method": client.ReplaceMethods.Random,
 		},
 	}
 
-	ch := make(chan client.ChatSSE, 100)
+	// -------------------------------------------------------------------------
 
-	err := cln.ChatSSE(ctx, input, ch)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	const url = "https://api.predictionguard.com/chat/completions"
+
+	ch := make(chan client.ChatSSE, 100)
+	if err := cln.Do(ctx, http.MethodPost, url, d, ch); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	for resp := range ch {

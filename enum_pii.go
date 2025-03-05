@@ -7,13 +7,11 @@ type piiSet struct {
 	Replace PII
 }
 
-// PIIs represents the set of PIIs that can be used.
 var PIIs = piiSet{
 	Block:   newPII("block"),
 	Replace: newPII("replace"),
 }
 
-// Parse parses the string value and returns a PII if one exists.
 func (piiSet) Parse(value string) (PII, error) {
 	pii, exists := piis[value]
 	if !exists {
@@ -23,8 +21,6 @@ func (piiSet) Parse(value string) (PII, error) {
 	return pii, nil
 }
 
-// MustParse parses the string value and returns a pii if one exists. If
-// an error occurs the function panics.
 func (piiSet) MustParse(value string) PII {
 	pii, err := PIIs.Parse(value)
 	if err != nil {
@@ -36,10 +32,8 @@ func (piiSet) MustParse(value string) PII {
 
 // =============================================================================
 
-// Set of known PIIs.
 var piis = make(map[string]PII)
 
-// PII represents a PII in the system.
 type PII struct {
 	value string
 }
@@ -50,12 +44,10 @@ func newPII(pii string) PII {
 	return p
 }
 
-// String returns the name of the PII.
 func (p PII) String() string {
 	return p.value
 }
 
-// UnmarshalText implement the unmarshal interface for JSON conversions.
 func (p *PII) UnmarshalText(data []byte) error {
 	pii, err := PIIs.Parse(string(data))
 	if err != nil {
@@ -66,12 +58,10 @@ func (p *PII) UnmarshalText(data []byte) error {
 	return nil
 }
 
-// MarshalText implement the marshal interface for JSON conversions.
 func (p PII) MarshalText() ([]byte, error) {
 	return []byte(p.value), nil
 }
 
-// Equal provides support for the go-cmp package and testing.
 func (p PII) Equal(p2 PII) bool {
 	return p.value == p2.value
 }

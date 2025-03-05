@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,14 +29,15 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	resp, err := cln.Capability(ctx, client.Capabilities.ChatCompletion)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	url := "https://api.predictionguard.com/models/" + client.Capabilities.ChatCompletion.String()
+
+	var resp client.ModelResponse
+	if err := cln.Do(ctx, http.MethodGet, url, nil, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	fmt.Println(resp)

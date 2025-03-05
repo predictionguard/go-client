@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,38 +29,61 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	image, err := client.NewImageNetwork("https://predictionguard.com/lib_eltrNYEjQbpUWFRI/oy2r533pndpk0q8q.png?w=1024&dpr=2")
+	image, err := client.NewImageNetwork("https://static.wixstatic.com/media/f54603_b7882b876e2b47d3a38843a58a9829f1~mv2.png")
 	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+		return fmt.Errorf("newimage: %w", err)
 	}
 
-	input := client.ChatVisionInput{
-		Model:       "llava-1.5-7b-hf",
-		Role:        client.Roles.User,
-		Question:    "Is there a computer in this picture?",
-		Image:       image,
-		MaxTokens:   1000,
-		Temperature: client.Ptr[float32](0.1),
-		TopP:        client.Ptr(0.1),
-		TopK:        client.Ptr(50),
-		InputExtension: &client.InputExtension{
-			PII:              client.PIIs.Replace,
-			PIIReplaceMethod: client.ReplaceMethods.Random,
+	base64, err := image.EncodeBase64(ctx)
+	if err != nil {
+		return fmt.Errorf("base64: %w", err)
+	}
+
+	d := client.D{
+		"model": "llava-1.5-7b-hf",
+		"messages": []client.D{
+			{
+				"role": client.Roles.User,
+				"content": []client.D{
+					{
+						"type": "text",
+						"text": "Is this a picture of a rose?",
+					},
+					{
+						"type": "image_url",
+						"image_url": client.D{
+							"url": fmt.Sprintf("data:image/png;base64,%s", base64),
+						},
+					},
+				},
+			},
 		},
-		OutputExtension: &client.OutputExtension{
-			Factuality: true,
-			Toxicity:   true,
+		"image":       image,
+		"max_tokens":  1000,
+		"temperature": 0.1,
+		"top_p":       0.1,
+		"top_k":       50,
+		"input": client.D{
+			"pii":                client.PIIs.Replace,
+			"pii_replace_method": client.ReplaceMethods.Random,
+		},
+		"output": client.D{
+			"factuality": false,
+			"toxicity":   true,
 		},
 	}
 
-	resp, err := cln.ChatVision(ctx, input)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/chat/completions"
+
+	var resp client.ChatVision
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
 	for i, choice := range resp.Choices {

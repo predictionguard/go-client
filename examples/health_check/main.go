@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PREDICTIONGUARD_API_KEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -28,17 +29,17 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	resp, err := cln.HealthCheck(ctx)
-	if err != nil {
-		return fmt.Errorf("healthcheck: %w", err)
+	const url = "https://api.predictionguard.com/readiness"
+
+	if err := cln.Do(ctx, http.MethodGet, url, nil, nil); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
-	log.Println(resp)
+	log.Println("ready")
 
 	return nil
 }
