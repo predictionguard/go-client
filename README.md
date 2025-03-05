@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -37,8 +38,8 @@ func main() {
 }
 
 func run() error {
-	host := "https://api.predictionguard.com"
-	apiKey := os.Getenv("PGKEY")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	logger := func(ctx context.Context, msg string, v ...any) {
 		s := fmt.Sprintf("msg: %s", msg)
@@ -48,36 +49,37 @@ func run() error {
 		log.Println(s)
 	}
 
-	cln := client.New(logger, host, apiKey)
+	cln := client.New(logger, os.Getenv("PREDICTIONGUARD_API_KEY"))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// -------------------------------------------------------------------------
 
-	input := client.ChatInput{
-		Model: client.Models.NeuralChat7B,
-		Messages: []client.ChatInputMessage{
-			{
-				Role:    client.Roles.User,
-				Content: "How do you feel about the world in general",
-			},
+	d := client.D{
+		"model":       "neural-chat-7b-v3-3",
+		"messages":    "How do you feel about the world in general",
+		"max_tokens":  1000,
+		"temperature": 0.1,
+		"top_p":       0.1,
+		"top_k":       50,
+		"input": client.D{
+			"pii":                client.PIIs.Replace,
+			"pii_replace_method": client.ReplaceMethods.Random,
 		},
-		MaxTokens:   1000,
-		Temperature: 0.1,
-		TopP:        0.1,
-		Options: &client.ChatInputOptions{
-			Factuality:       true,
-			Toxicity:         true,
-			PII:              client.PIIs.Replace,
-			PIIReplaceMethod: client.ReplaceMethods.Random,
+		"output": client.D{
+			"factuality": true,
+			"toxicity":   true,
 		},
 	}
 
-	resp, err := cln.Chat(ctx, input)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	// -------------------------------------------------------------------------
+
+	const url = "https://api.predictionguard.com/chat/completions"
+
+	var resp client.Chat
+	if err := cln.Do(ctx, http.MethodPost, url, d, &resp); err != nil {
+		return fmt.Errorf("do: %w", err)
 	}
 
-	fmt.Println(resp.Choices[0].Message.Content)
+	fmt.Println(resp.Choices[0].Message)
 
 	return nil
 }
