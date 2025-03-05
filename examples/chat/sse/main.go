@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/predictionguard/go-client"
+	"github.com/predictionguard/go-client/v2"
 )
 
 func main() {
