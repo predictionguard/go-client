@@ -207,9 +207,3 @@ func do(ctx context.Context, cln *Client, method string, endpoint string, body a
 		}
 	}
 }
-
-// =============================================================================
-
-func Ptr[T any](t T) *T {
-	return &t
-}
