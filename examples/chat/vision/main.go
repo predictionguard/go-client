@@ -62,7 +62,6 @@ func run() error {
 				},
 			},
 		},
-		"image":       image,
 		"max_tokens":  1000,
 		"temperature": 0.1,
 		"top_p":       0.1,

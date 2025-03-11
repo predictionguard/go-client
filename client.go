@@ -100,10 +100,10 @@ type SSEClient[T any] struct {
 	*Client
 }
 
-func NewSSE[T any](log Logger, apiKey string, options ...func(cln *Client)) SSEClient[T] {
+func NewSSE[T any](log Logger, apiKey string, options ...func(cln *Client)) *SSEClient[T] {
 	cln := New(log, apiKey, options...)
 
-	return SSEClient[T]{
+	return &SSEClient[T]{
 		Client: cln,
 	}
 }
