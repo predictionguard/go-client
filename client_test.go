@@ -1523,7 +1523,7 @@ func ExampleClient_Do_chatSSE() {
 
 	for resp := range ch {
 		if resp.Error != "" {
-			log.Fatalf(resp.Error)
+			log.Fatalf("%s", resp.Error)
 		}
 
 		for _, choice := range resp.Choices {

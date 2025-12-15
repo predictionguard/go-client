@@ -3,6 +3,7 @@
 #
 # Project specific
 .env
+.envrc
 
 # Binaries for programs and plugins
 *.exe
@@ -22,3 +23,6 @@
 
 # Go workspace file
 go.work
+
+# JetBrains IDE
+.idea
