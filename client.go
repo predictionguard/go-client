@@ -15,7 +15,7 @@ import (
 )
 
 // TODO: Maintain this version when a new tag is created.
-const version = "v2.1.0"
+const version = "v2.2.0"
 
 var ErrUnauthorized = errors.New("api understands the request but refuses to authorize it")
 
