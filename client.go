@@ -1,4 +1,9 @@
 // Package client provides support to access the Prediction Guard API service.
+//
+// Deprecated: This module is no longer maintained. Some features are broken or
+// missing, and no further updates will be released. Use an OpenAI-compatible
+// or Anthropic-compatible client pointed at the Prediction Guard API instead.
+// See https://github.com/predictionguard/go-client#readme for migration details.
 package client
 
 import (
@@ -45,6 +50,11 @@ type Client struct {
 	http   *http.Client
 }
 
+// New constructs a client for the Prediction Guard API.
+//
+// Deprecated: The go-client module is no longer maintained. Use an OpenAI-compatible
+// or Anthropic-compatible client pointed at the Prediction Guard API instead.
+// See https://github.com/predictionguard/go-client#readme.
 func New(log Logger, apiKey string, options ...func(cln *Client)) *Client {
 	cln := Client{
 		log:    log,
@@ -100,6 +110,11 @@ type SSEClient[T any] struct {
 	*Client
 }
 
+// NewSSE constructs a client for streaming Prediction Guard API responses.
+//
+// Deprecated: The go-client module is no longer maintained. Use an OpenAI-compatible
+// or Anthropic-compatible client pointed at the Prediction Guard API instead.
+// See https://github.com/predictionguard/go-client#readme.
 func NewSSE[T any](log Logger, apiKey string, options ...func(cln *Client)) *SSEClient[T] {
 	cln := New(log, apiKey, options...)
 
